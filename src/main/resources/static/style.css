@@ -1,0 +1,58 @@
+/* --- 1. 기본 배경 & 버튼 --- */
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(#87CEEB, #a2d9e1 70%, #2E8B57);
+    min-height: 100vh;
+    overflow: hidden;
+    text-align: center;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+h1 {
+    font-size: 2.5em;
+    font-weight: bold;
+}
+
+.controls {
+    margin: 20px 0;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    box-shadow: 0 4px #388E3C;
+    transition: all 0.1s ease;
+}
+
+button:disabled {
+    background-color: #9E9E9E;
+    box-shadow: 0 4px #616161;
+    cursor: not-allowed;
+}
+
+button:active:not(:disabled) {
+    box-shadow: 0 2px #388E3C;
+    transform: translateY(2px);
+}
+
+/* --- 2. 캔버스 컨테이너 (🔥 오타 수정) --- */
+/* (수정 전) #canvasontainer */
+#canvasContainer { /* 👈 (수정 후) 'C' 추가 */
+    width: 1000px;
+    margin: 0 auto; /* 👈 (이게 중앙 정렬 코드입니다) */
+    border: 5px solid #333;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    border-radius: 10px;
+}
+
+#raceCanvas {
+    background-color: #555;
+    display: block;
+    border-radius: 5px;
+}
