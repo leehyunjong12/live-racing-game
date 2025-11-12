@@ -12,7 +12,6 @@ public final class MapDataStorage {
     public static final int TRACK_LENGTH = 20;
 
     public static final Map<Integer, TileType> SPECIAL_TILES = Map.of(
-            4, TileType.SHORTCUT,
             8, TileType.OBSTACLE,
             12, TileType.MOVE_BACK
     );
@@ -22,11 +21,6 @@ public final class MapDataStorage {
             13, List.of(14, 18)
     );
 
-    public static final Map<Integer, Integer> SHORTCUT_DESTINATIONS = Map.of(
-            4, 9,
-            10, 15,
-            18, 19
-    );
 
     public static final List<Integer> PRE_FINISH_NODES = List.of(9, 17, 19);
 
@@ -59,8 +53,7 @@ public final class MapDataStorage {
             List.of(5, 6), List.of(6, 7), List.of(7, 8), List.of(8, 9), List.of(9, 20),
             List.of(2, 10), List.of(10, 11), List.of(11, 12), List.of(12, 13), List.of(13, 14),
             List.of(14, 15), List.of(15, 16), List.of(16, 17), List.of(17, 20),
-            List.of(13, 18), List.of(18, 19), List.of(19, 20),
-            List.of(4, 9), List.of(10, 15), List.of(18, 19)
+            List.of(13, 18), List.of(18, 19), List.of(19, 20)
     );
 
 

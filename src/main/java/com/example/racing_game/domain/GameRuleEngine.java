@@ -26,15 +26,14 @@ public class GameRuleEngine {
         TileType tileType = MapDataStorage.SPECIAL_TILES.get(currentPosition);
         return switch (tileType) {
             case MOVE_BACK -> Math.max(0, currentPosition - 2);
-            case SHORTCUT -> MapDataStorage.SHORTCUT_DESTINATIONS.get(currentPosition);
+
             default -> currentPosition;
         };
     }
 
     private int handleJunction(int currentPosition) {
         List<Integer> choices = MapDataStorage.JUNCTIONS.get(currentPosition);
-        int choice = choices.get(random.nextInt(choices.size()));
-        return MapDataStorage.SHORTCUT_DESTINATIONS.getOrDefault(choice, choice);
+        return choices.get(random.nextInt(choices.size()));
     }
 
     private int handleNormalMove(int currentPosition) {
