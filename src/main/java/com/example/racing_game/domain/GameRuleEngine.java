@@ -6,7 +6,6 @@ import java.util.Random;
 public class GameRuleEngine {
 
     private final Random random = new Random();
-
     public static final int TRACK_LENGTH = MapDataStorage.TRACK_LENGTH;
 
     public int getNextPosition(int currentPosition, boolean shouldMove) {
@@ -16,30 +15,33 @@ public class GameRuleEngine {
         if (MapDataStorage.SPECIAL_TILES.containsKey(currentPosition)) {
             return handleSpecialTile(currentPosition);
         }
-        if (MapDataStorage.JUNCTIONS.containsKey(currentPosition)) {
-            return handleJunction(currentPosition);
-        }
-        return handleNormalMove(currentPosition);
+
+        return findNextNode(currentPosition);
     }
 
     private int handleSpecialTile(int currentPosition) {
         TileType tileType = MapDataStorage.SPECIAL_TILES.get(currentPosition);
         return switch (tileType) {
+            case OBSTACLE -> currentPosition;
             case MOVE_BACK -> Math.max(0, currentPosition - 2);
-
             default -> currentPosition;
         };
     }
 
-    private int handleJunction(int currentPosition) {
-        List<Integer> choices = MapDataStorage.JUNCTIONS.get(currentPosition);
+
+    private int findNextNode(int currentPosition) {
+        if (!MapDataStorage.ADJACENCY_LIST.containsKey(currentPosition)) {
+            return currentPosition;
+        }
+
+        List<Integer> choices = MapDataStorage.ADJACENCY_LIST.get(currentPosition);
+
         return choices.get(random.nextInt(choices.size()));
     }
 
-    private int handleNormalMove(int currentPosition) {
-        if (MapDataStorage.PRE_FINISH_NODES.contains(currentPosition)) {
-            return TRACK_LENGTH;
-        }
-        return Math.min(TRACK_LENGTH, currentPosition + 1);
+
+
+    public TileType getTileTypeAt(int position) {
+        return MapDataStorage.SPECIAL_TILES.getOrDefault(position, TileType.NORMAL);
     }
 }
