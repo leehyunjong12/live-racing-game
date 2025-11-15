@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import com.example.racing_game.dto.RuleResult;
 
 public class RaceService {
 
@@ -37,9 +38,14 @@ public class RaceService {
 
         for (int i = 0; i < rounds; i++) {
             cars.forEach(car -> {
+                if (car.isSkippingTurn()) {
+                    car.consumeSkipTurn();
+                    return;
+                }
                 boolean canMove = moveStrategy.shouldMove();
-                int nextPos = gameRuleEngine.getNextPosition(car.getPosition(), canMove);
-                car.setPosition(nextPos);
+                RuleResult result = gameRuleEngine.getNextPosition(car.getPosition(), canMove);
+                car.setPosition(result.nextPosition());
+                car.setTurnsToSkip(result.penaltyTurns());
             });
 
             String roundResultJson = createJsonState(i + 1, cars);

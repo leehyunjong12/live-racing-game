@@ -11,8 +11,8 @@ public final class MapDataStorage {
     public static final int TRACK_LENGTH = 30;
 
     public static final Map<Integer, TileType> SPECIAL_TILES = Map.of(
-            //7, TileType.OBSTACLE,
-            //19, TileType.OBSTACLE
+            23, TileType.OBSTACLE,
+            28, TileType.OBSTACLE,
             6, TileType.MOVE_BACK_NODE,
             17, TileType.MOVE_BACK_NODE,
             27, TileType.MOVE_BACK_NODE

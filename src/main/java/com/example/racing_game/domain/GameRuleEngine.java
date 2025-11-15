@@ -1,5 +1,6 @@
 package com.example.racing_game.domain;
 
+import com.example.racing_game.dto.RuleResult;
 import java.util.List;
 import java.util.Random;
 
@@ -8,33 +9,35 @@ public class GameRuleEngine {
     private final Random random = new Random();
     public static final int TRACK_LENGTH = MapDataStorage.TRACK_LENGTH;
 
-    public int getNextPosition(int currentPosition, boolean shouldMove) {
-        if (currentPosition == TRACK_LENGTH) { return TRACK_LENGTH; }
-        if (!shouldMove) { return currentPosition; }
-
-        if (MapDataStorage.SPECIAL_TILES.containsKey(currentPosition)) {
-            return handleSpecialTile(currentPosition);
+    public RuleResult getNextPosition(int currentPosition, boolean shouldMove) {
+        if (currentPosition == TRACK_LENGTH) {
+            return new RuleResult(TRACK_LENGTH, 0);
+        }
+        if (!shouldMove) {
+            return new RuleResult(currentPosition, 0);
         }
 
-        return findNextNode(currentPosition);
+        int nextNode = findNextNode(currentPosition);
+
+        return handleSpecialTile(nextNode);
     }
 
-    private int handleSpecialTile(int currentPosition) {
-        TileType tileType = MapDataStorage.SPECIAL_TILES.get(currentPosition);
+    private RuleResult handleSpecialTile(int position) {
+        TileType tileType = MapDataStorage.SPECIAL_TILES.getOrDefault(position, TileType.NORMAL);
         switch (tileType) {
             case OBSTACLE:
-                return currentPosition;
-
+                return new RuleResult(position, 1);
             case MOVE_BACK_NODE:
                 // 30% 확률
                 if (random.nextInt(100) < 30) {
-                    return Math.max(0, currentPosition - 2);
+                    int penaltyPos = Math.max(0, position - 2);
+                    return new RuleResult(penaltyPos, 0);
                 } else {
-                    return findNextNode(currentPosition);
+                    return new RuleResult(position, 0);
                 }
 
             default:
-                return currentPosition;
+                return new RuleResult(position, 0);
         }
     }
 
