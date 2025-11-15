@@ -8,6 +8,7 @@ import com.example.racing_game.domain.TrackLayout;
 import com.example.racing_game.service.RaceService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.Random;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -25,14 +26,18 @@ public class AppConfig implements WebSocketConfigurer {
         registry.addHandler(raceBroadcastHandler(), "/ws/race")
                 .setAllowedOrigins("*");
     }
+
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
     }
 
     @Bean
+    public Random random() {return new Random();}
+
+    @Bean
     public GameRuleEngine gameRuleEngine() {
-        return new GameRuleEngine();
+        return new GameRuleEngine(random());
     }
 
     @Bean

@@ -6,8 +6,12 @@ import java.util.Random;
 
 public class GameRuleEngine {
 
-    private final Random random = new Random();
+    private final Random random;
     public static final int TRACK_LENGTH = MapDataStorage.TRACK_LENGTH;
+
+    public GameRuleEngine(Random random) {
+        this.random = random;
+    }
 
     public RuleResult getNextPosition(int currentPosition, boolean shouldMove) {
         if (currentPosition == TRACK_LENGTH) {
