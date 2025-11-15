@@ -21,11 +21,21 @@ public class GameRuleEngine {
 
     private int handleSpecialTile(int currentPosition) {
         TileType tileType = MapDataStorage.SPECIAL_TILES.get(currentPosition);
-        return switch (tileType) {
-            case OBSTACLE -> currentPosition;
-            case MOVE_BACK -> Math.max(0, currentPosition - 2);
-            default -> currentPosition;
-        };
+        switch (tileType) {
+            case OBSTACLE:
+                return currentPosition;
+
+            case MOVE_BACK_NODE:
+                // 30% 확률
+                if (random.nextInt(100) < 30) {
+                    return Math.max(0, currentPosition - 2);
+                } else {
+                    return findNextNode(currentPosition);
+                }
+
+            default:
+                return currentPosition;
+        }
     }
 
 
@@ -39,9 +49,4 @@ public class GameRuleEngine {
         return choices.get(random.nextInt(choices.size()));
     }
 
-
-
-    public TileType getTileTypeAt(int position) {
-        return MapDataStorage.SPECIAL_TILES.getOrDefault(position, TileType.NORMAL);
-    }
 }

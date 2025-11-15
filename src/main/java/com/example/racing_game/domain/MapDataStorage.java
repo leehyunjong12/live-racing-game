@@ -13,8 +13,9 @@ public final class MapDataStorage {
     public static final Map<Integer, TileType> SPECIAL_TILES = Map.of(
             //7, TileType.OBSTACLE,
             //19, TileType.OBSTACLE
-            //12, TileType.MOVE_BACK,
-            //25, TileType.MOVE_BACK
+            6, TileType.MOVE_BACK_NODE,
+            17, TileType.MOVE_BACK_NODE,
+            27, TileType.MOVE_BACK_NODE
     );
 
     public static final Map<Integer, List<Integer>> ADJACENCY_LIST = Map.ofEntries(
