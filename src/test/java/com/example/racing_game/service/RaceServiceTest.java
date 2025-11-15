@@ -69,16 +69,16 @@ public class RaceServiceTest {
     }
 
     @Test
-    @DisplayName("차가 '턴 스킵' 상태일 때, 다음 턴 이동 로직은 실행되지 않는다")
+    @DisplayName("차가 '턴 스킵' 상태일 때, 다음 두 턴 이동 로직은 실행되지 않는다")
     void shouldSkipTurnAndNotMoveWhenCarIsSkipping() throws JsonProcessingException {
         List<String> carNames = List.of("Pobi");
-        int rounds = 2;
+        int rounds = 3;
         Consumer<String> broadcaster = (json) -> {};
 
         when(objectMapper.writeValueAsString(any())).thenReturn("{}");
         when(moveStrategy.shouldMove()).thenReturn(true);
         when(gameRuleEngine.getNextPosition(0, true))
-                .thenReturn(new RuleResult(8, 1));
+                .thenReturn(new RuleResult(8, 2));
         raceService.startAsyncRace(carNames, rounds, broadcaster);
 
         verify(gameRuleEngine, times(1)).getNextPosition(0, true);

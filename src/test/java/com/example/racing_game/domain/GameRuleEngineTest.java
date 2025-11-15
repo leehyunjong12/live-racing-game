@@ -65,12 +65,12 @@ public class GameRuleEngineTest {
     }
 
     @Test
-    @DisplayName("OBSTACLE(23번)을 밟으면, 23번으로 이동하고 1턴 페널티를 받음")
+    @DisplayName("OBSTACLE(23번)을 밟으면, 23번으로 이동하고 2턴 페널티를 받음")
     void shouldStayAndGetPenaltyOnObstacle() {
         RuleResult result = gameRuleEngine.getNextPosition(20, true);
 
         assertThat(result.nextPosition()).isEqualTo(23);
-        assertThat(result.penaltyTurns()).isEqualTo(1);
+        assertThat(result.penaltyTurns()).isEqualTo(2);
     }
     @Test
     @DisplayName("MOVE_BACK_NODE(6번)을 밟으면, 30% 확률로 4번(6-2)으로 이동")

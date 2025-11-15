@@ -30,7 +30,7 @@ public class GameRuleEngine {
         TileType tileType = MapDataStorage.SPECIAL_TILES.getOrDefault(position, TileType.NORMAL);
         switch (tileType) {
             case OBSTACLE:
-                return new RuleResult(position, 1);
+                return new RuleResult(position, 2);
             case MOVE_BACK_NODE:
                 // 30% 확률
                 if (random.nextInt(100) < 30) {
