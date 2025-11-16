@@ -51,7 +51,7 @@ public class RaceService {
             String roundResultJson = createJsonState(i + 1, cars);
             broadcaster.accept(roundResultJson);
 
-            try { Thread.sleep(500); }
+            try { Thread.sleep(1000); }
             catch (InterruptedException e) { Thread.currentThread().interrupt(); }
 
             if (isRaceFinished(cars)) {

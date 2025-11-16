@@ -65,13 +65,30 @@ public class GameRuleEngineTest {
     }
 
     @Test
-    @DisplayName("OBSTACLE(23번)을 밟으면, 23번으로 이동하고 2턴 페널티를 받음")
+    @DisplayName("JAIL(23번)을 밟으면, 30% 확률로 2턴 페널티를 받음")
     void shouldStayAndGetPenaltyOnObstacle() {
+        when(random.nextInt(1)).thenReturn(0);
+        when(random.nextInt(100)).thenReturn(20);
         RuleResult result = gameRuleEngine.getNextPosition(20, true);
 
         assertThat(result.nextPosition()).isEqualTo(23);
         assertThat(result.penaltyTurns()).isEqualTo(2);
     }
+
+    @Test
+    @DisplayName("JAIL(23번)을 밟으면, 70% 확률로 페널티를 받지 않음")
+    void shouldNotGetPenaltyOnJailWith70PercentChance() {
+
+        when(random.nextInt(1)).thenReturn(0);
+
+        when(random.nextInt(100)).thenReturn(50);
+
+        RuleResult result = gameRuleEngine.getNextPosition(20, true);
+
+        assertThat(result.nextPosition()).isEqualTo(23);
+        assertThat(result.penaltyTurns()).isEqualTo(0);
+    }
+
     @Test
     @DisplayName("MOVE_BACK_NODE(6번)을 밟으면, 30% 확률로 4번(6-2)으로 이동")
     void shouldMoveBackOnMoveBackNode() {
@@ -83,6 +100,7 @@ public class GameRuleEngineTest {
         assertThat(result.nextPosition()).isEqualTo(4);
         assertThat(result.penaltyTurns()).isEqualTo(0);
     }
+
     @Test
     @DisplayName("MOVE_BACK_NODE(6번)을 밟아도, 70% 확률로 6번에 머뭄")
     void shouldStayOnMoveBackNodeWith70PercentChance() {
@@ -94,6 +112,7 @@ public class GameRuleEngineTest {
         assertThat(result.nextPosition()).isEqualTo(6);
         assertThat(result.penaltyTurns()).isEqualTo(0);
     }
+
     @Test
     @DisplayName("막다른 길(26번)에 도착하면, 제자리를 반환")
     void shouldStayAtDeadEndNode() {
