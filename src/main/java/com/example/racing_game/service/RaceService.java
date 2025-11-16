@@ -86,9 +86,14 @@ public class RaceService {
     }
     private String createWinnerJson(List<Car> cars) {
         int maxPosition = cars.stream().mapToInt(Car::getPosition).max().orElse(0);
-        List<String> winners = cars.stream()
-                .filter(car -> car.getPosition() == maxPosition)
-                .map(Car::getName).toList();
+        List<String> winners;
+        if (maxPosition < GameRuleEngine.TRACK_LENGTH) {
+            winners = List.of();
+        } else {
+            winners = cars.stream()
+                    .filter(car -> car.getPosition() == maxPosition)
+                    .map(Car::getName).toList();
+        }
         Map<String, Object> jsonMap = Map.of("type", "WINNER", "winners", winners);
         try {
             return objectMapper.writeValueAsString(jsonMap);

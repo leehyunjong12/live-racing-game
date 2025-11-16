@@ -129,4 +129,28 @@ public class RaceServiceTest {
         List<String> winners = (List<String>) winnerMap.get("winners");
         assertThat(winners).containsExactly("Pobi");
     }
+    @Test
+    @DisplayName("라운드가 끝나도 결승선에 아무도 도착하지 못하면, 빈 우승자 리스트를 방송")
+    void shouldBroadcastEmptyWinnerListWhenNoOneFinishes() throws JsonProcessingException {
+        List<String> carNames = List.of("Pobi", "Crong");
+        int rounds = 2;
+        Consumer<String> broadcaster = (json) -> {};
+
+        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+        when(moveStrategy.shouldMove()).thenReturn(true);
+        when(gameRuleEngine.getNextPosition(anyInt(), anyBoolean()))
+                .thenReturn(new RuleResult(5, 0));
+
+        raceService.startAsyncRace(carNames, rounds, broadcaster);
+
+        verify(objectMapper, times(4)).writeValueAsString(captor.capture());
+
+        Map<String, Object> winnerMap = captor.getAllValues().get(3);
+        assertThat(winnerMap.get("type")).isEqualTo("WINNER");
+
+        List<String> winners = (List<String>) winnerMap.get("winners");
+        assertThat(winners).isEmpty();
+    }
 }
