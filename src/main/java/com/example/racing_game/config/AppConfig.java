@@ -47,7 +47,7 @@ public class AppConfig implements WebSocketConfigurer {
 
     @Bean
     public MoveStrategy moveStrategy() {
-        return new RandomMoveStrategy();
+        return new RandomMoveStrategy(random());
     }
 
     @Bean

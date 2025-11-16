@@ -4,7 +4,11 @@ import java.util.Random;
 
 public class RandomMoveStrategy implements MoveStrategy {
 
-    private final Random random = new Random();
+    private final Random random;
+
+    public RandomMoveStrategy(Random random) {
+        this.random = random;
+    }
 
     @Override
     public boolean shouldMove() {
