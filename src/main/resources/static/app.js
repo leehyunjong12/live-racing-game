@@ -112,7 +112,7 @@ function drawTrack() {
     });
 
     Object.values(TRACK_MAP).forEach(node => {
-        ctx.fillStyle = "#FFF";
+        ctx.fillStyle = getNodeColor(node.type);
         ctx.beginPath();
         ctx.arc(node.x, node.y, 10, 0, 2 * Math.PI);
         ctx.fill();
@@ -123,6 +123,24 @@ function drawTrack() {
         ctx.textBaseline = "middle";
         ctx.fillText(node.id, node.x, node.y);
     });
+}
+function getNodeColor(tileType) {
+    switch (tileType) {
+        case "OBSTACLE":
+        case "JAIL":
+            return "#FF4136";
+        case "MOVE_BACK_NODE":
+            return "#FF851B";
+        case "MOVE_TO_START":
+            return "#0074D9";
+        case "MOVE_TO_MIDPOINTS":
+            return "#7FDBFF";
+        case "SLIDE":
+            return "#FFDC00"
+        case "NORMAL":
+        default:
+            return "#FFFFFF"; // 흰색 (일반)
+    }
 }
 function drawJailNode() {
     ctx.fillStyle = "#FF0000";
