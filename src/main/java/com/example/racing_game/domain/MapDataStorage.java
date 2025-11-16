@@ -15,7 +15,10 @@ public final class MapDataStorage {
             28, TileType.JAIL,
             6, TileType.MOVE_BACK_NODE,
             17, TileType.MOVE_BACK_NODE,
-            27, TileType.MOVE_BACK_NODE
+            27, TileType.MOVE_BACK_NODE,
+            26, TileType.MOVE_TO_MIDPOINTS,
+            29, TileType.MOVE_TO_START,
+            11, TileType.SLIDE
     );
 
     public static final Map<Integer, List<Integer>> ADJACENCY_LIST = Map.ofEntries(

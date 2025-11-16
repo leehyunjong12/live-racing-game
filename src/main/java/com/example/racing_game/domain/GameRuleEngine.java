@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 public class GameRuleEngine {
-
+    private static final int NO_PENALTY = 0;
     private final Random random;
     public static final int TRACK_LENGTH = MapDataStorage.TRACK_LENGTH;
 
@@ -15,10 +15,10 @@ public class GameRuleEngine {
 
     public RuleResult getNextPosition(int currentPosition, boolean shouldMove) {
         if (currentPosition == TRACK_LENGTH) {
-            return new RuleResult(TRACK_LENGTH, 0);
+            return new RuleResult(TRACK_LENGTH, NO_PENALTY);
         }
         if (!shouldMove) {
-            return new RuleResult(currentPosition, 0);
+            return new RuleResult(currentPosition, NO_PENALTY);
         }
 
         int nextNode = findNextNode(currentPosition);
@@ -34,20 +34,24 @@ public class GameRuleEngine {
                 if (random.nextInt(100) < 30) {
                     return new RuleResult(position, 2);
                 } else {
-                    return new RuleResult(position, 0);
+                    return new RuleResult(position, NO_PENALTY);
                 }
 
             case MOVE_BACK_NODE:
                 // 30% 확률
                 if (random.nextInt(100) < 30) {
                     int penaltyPos = Math.max(0, position - 2);
-                    return new RuleResult(penaltyPos, 0);
+                    return new RuleResult(penaltyPos, NO_PENALTY);
                 } else {
-                    return new RuleResult(position, 0);
+                    return new RuleResult(position, NO_PENALTY);
                 }
-
+            case MOVE_TO_MIDPOINTS:
+                int randomPoint = random.nextInt(10, 21);
+                return new RuleResult(randomPoint,NO_PENALTY);
+            case MOVE_TO_START:
+                return new RuleResult(0, NO_PENALTY);
             default:
-                return new RuleResult(position, 0);
+                return new RuleResult(position, NO_PENALTY);
         }
     }
 

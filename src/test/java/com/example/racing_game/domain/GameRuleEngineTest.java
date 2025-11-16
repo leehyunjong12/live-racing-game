@@ -114,11 +114,24 @@ public class GameRuleEngineTest {
     }
 
     @Test
-    @DisplayName("막다른 길(26번)에 도착하면, 제자리를 반환")
-    void shouldStayAtDeadEndNode() {
-        RuleResult result = gameRuleEngine.getNextPosition(26, true);
+    @DisplayName("MOVE_TO_START(29)를 밟으면, 0번으로 이동")
+    void shouldMoveToStartOnMoveToStartNode() {
+        when(random.nextInt(2)).thenReturn(1);
 
-        assertThat(result.nextPosition()).isEqualTo(26);
-        assertThat(result.penaltyTurns()).isEqualTo(0);
+        RuleResult result = gameRuleEngine.getNextPosition(25, true);
+
+        assertThat(result.nextPosition()).isEqualTo(0);
+        assertThat(result.penaltyTurns()).isZero();
+    }
+    @Test
+    @DisplayName("MOVE_TO_MIDPOINTS(16번)를 밟으면, 10~20 사이의 17번으로 이동")
+    void shouldMoveToMidpointOnMoveToMidpointsNode() {
+        when(random.nextInt(2)).thenReturn(1);
+        when(random.nextInt(10, 21)).thenReturn(17);
+
+        RuleResult result = gameRuleEngine.getNextPosition(24, true);
+
+        assertThat(result.nextPosition()).isEqualTo(17);
+        assertThat(result.penaltyTurns()).isZero();
     }
 }
