@@ -3,6 +3,32 @@ const resetButton = document.getElementById('resetButton');
 const canvas = document.getElementById('raceCanvas');
 const ctx = canvas.getContext('2d');
 const JAIL_COORDS = { x: 50, y: 450 };
+const NODE_INFO = {
+    "NORMAL": {
+        color: "#FFFFFF",
+        description: "일반"
+    },
+    "JAIL": {
+        color: "#FF4136",
+        description: "2턴동안 감옥 (30% 확률)"
+    },
+    "MOVE_BACK_NODE": {
+        color: "#FF851B",
+        description: "현재 숫자 -2 위치로 (30% 확률)"
+    },
+    "MOVE_TO_START": {
+        color: "#0074D9",
+        description: "처음으로"
+    },
+    "MOVE_TO_MIDPOINTS": {
+        color: "#7FDBFF",
+        description: "중간지점중 랜덤 이동"
+    },
+    "SLIDE": {
+        color: "#FFDC00",
+        description: "슬라이드"
+    }
+};
 
 let TRACK_MAP = {};
 let TRACK_LINES = [];
@@ -125,22 +151,11 @@ function drawTrack() {
     });
 }
 function getNodeColor(tileType) {
-    switch (tileType) {
-        case "OBSTACLE":
-        case "JAIL":
-            return "#FF4136";
-        case "MOVE_BACK_NODE":
-            return "#FF851B";
-        case "MOVE_TO_START":
-            return "#0074D9";
-        case "MOVE_TO_MIDPOINTS":
-            return "#7FDBFF";
-        case "SLIDE":
-            return "#FFDC00"
-        case "NORMAL":
-        default:
-            return "#FFFFFF"; // 흰색 (일반)
+    const info = NODE_INFO[tileType];
+    if (info) {
+        return info.color;
     }
+    return NODE_INFO["NORMAL"].color;
 }
 function drawJailNode() {
     ctx.fillStyle = "#FF0000";
@@ -156,7 +171,7 @@ function drawJailNode() {
 }
 
 function drawCars() {
-    let jailCount = 0; // 무인도에 갇힌 차들의 "줄"
+    let jailCount = 0;
 
     Object.values(cars).forEach(car => {
 
@@ -190,3 +205,27 @@ function drawCar(car, x, y) {
     ctx.font = "10px Arial";
     ctx.fillText(car.name, x, y - 15);
 }
+
+function populateLegend() {
+    const legendList = document.getElementById('legend-list');
+    legendList.innerHTML = '';
+
+    for (const typeName in NODE_INFO) {
+        const info = NODE_INFO[typeName];
+
+        const li = document.createElement('li');
+
+        const colorSpan = document.createElement('span');
+        colorSpan.className = 'legend-color';
+        colorSpan.style.backgroundColor = info.color;
+
+        const textNode = document.createTextNode(` ${info.description}`);
+
+        li.appendChild(colorSpan);
+        li.appendChild(textNode);
+        legendList.appendChild(li);
+    }
+}
+document.addEventListener('DOMContentLoaded', (event) => {
+    populateLegend();
+});

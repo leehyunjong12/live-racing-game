@@ -1,4 +1,3 @@
-/* --- 1. 기본 배경 & 버튼 --- */
 body {
     font-family: Arial, sans-serif;
     background: linear-gradient(#87CEEB, #a2d9e1 70%, #2E8B57);
@@ -7,6 +6,8 @@ body {
     text-align: center;
     color: white;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    padding-top: 20px;
+    box-sizing: border-box;
 }
 
 h1 {
@@ -41,11 +42,9 @@ button:active:not(:disabled) {
     transform: translateY(2px);
 }
 
-/* --- 2. 캔버스 컨테이너 (🔥 오타 수정) --- */
-/* (수정 전) #canvasontainer */
-#canvasContainer { /* 👈 (수정 후) 'C' 추가 */
+#canvasContainer {
     width: 1000px;
-    margin: 0 auto; /* 👈 (이게 중앙 정렬 코드입니다) */
+    margin: 0 auto;
     border: 5px solid #333;
     box-shadow: 0 10px 20px rgba(0,0,0,0.4);
     border-radius: 10px;
@@ -55,4 +54,48 @@ button:active:not(:disabled) {
     background-color: #555;
     display: block;
     border-radius: 5px;
+}
+
+#legend {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: left;
+    z-index: 100;
+    color: white;
+}
+
+#legend h3 {
+    margin: 0 0 10px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #777;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#legend ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#legend li {
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.legend-color {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 1px solid #333;
+    margin-right: 8px;
+    border-radius: 2px;
 }
