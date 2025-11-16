@@ -72,6 +72,7 @@ public class RaceService {
                     Map<String, Object> map = new HashMap<>();
                     map.put("name", car.getName());
                     map.put("position", car.getPosition());
+                    map.put("turnsToSkip", car.getTurnsToSkip());
                     return map;})
                 .toList();
         Map<String, Object> jsonMap = Map.of(

@@ -2,6 +2,7 @@ const startButton = document.getElementById('startButton');
 const resetButton = document.getElementById('resetButton');
 const canvas = document.getElementById('raceCanvas');
 const ctx = canvas.getContext('2d');
+const JAIL_COORDS = { x: 50, y: 450 };
 
 let TRACK_MAP = {};
 let TRACK_LINES = [];
@@ -64,7 +65,7 @@ socket.onmessage = function(event) {
 function updateCarPositions(carStates) {
 
     carStates.forEach((carState, index) => {
-        const { name, position } = carState;
+        const { name, position,turnsToSkip } = carState;
         const targetCoords = TRACK_MAP[position];
         if (!targetCoords) return;
 
@@ -73,11 +74,13 @@ function updateCarPositions(carStates) {
                 name: name,
                 x: targetCoords.x,
                 y: targetCoords.y,
-                color: carColors[index % carColors.length]
+                color: carColors[index % carColors.length],
+                turnsToSkip: turnsToSkip
             };
         } else {
             cars[name].x = targetCoords.x;
             cars[name].y = targetCoords.y;
+            cars[name].turnsToSkip = turnsToSkip;
         }
     });
 }
@@ -89,9 +92,8 @@ function displayWinner(winners) {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawTrack();
-    Object.values(cars).forEach(car => {
-        drawCar(car);
-    });
+    drawJailNode();
+    drawCars();
     requestAnimationFrame(draw);
 }
 
@@ -122,14 +124,51 @@ function drawTrack() {
         ctx.fillText(node.id, node.x, node.y);
     });
 }
-
-function drawCar(car) {
-    ctx.fillStyle = car.color;
+function drawJailNode() {
+    ctx.fillStyle = "#FF0000";
     ctx.beginPath();
-    ctx.arc(car.x, car.y, 8, 0, 2 * Math.PI);
+    ctx.arc(JAIL_COORDS.x, JAIL_COORDS.y, 10, 0, 2 * Math.PI);
     ctx.fill();
 
     ctx.fillStyle = "#FFF";
     ctx.font = "10px Arial";
-    ctx.fillText(car.name, car.x, car.y - 15);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("JAIL", JAIL_COORDS.x, JAIL_COORDS.y);
+}
+
+function drawCars() {
+    let jailCount = 0; // 무인도에 갇힌 차들의 "줄"
+
+    Object.values(cars).forEach(car => {
+
+        if (car.turnsToSkip > 0) {
+            const x = JAIL_COORDS.x + 30 + (jailCount * 30);
+            const y = JAIL_COORDS.y;
+
+            drawCar(car, x, y);
+
+            ctx.fillStyle = "red";
+            ctx.font = "bold 12px Arial";
+            ctx.fillText(`SKIP (${car.turnsToSkip})`, x, y + 15);
+
+            jailCount++;
+
+        } else {
+
+            drawCar(car, car.x, car.y);
+        }
+    });
+}
+
+
+function drawCar(car, x, y) {
+    ctx.fillStyle = car.color;
+    ctx.beginPath();
+    ctx.arc(x, y, 8, 0, 2 * Math.PI);
+    ctx.fill();
+
+    ctx.fillStyle = "#FFF";
+    ctx.font = "10px Arial";
+    ctx.fillText(car.name, x, y - 15);
 }
