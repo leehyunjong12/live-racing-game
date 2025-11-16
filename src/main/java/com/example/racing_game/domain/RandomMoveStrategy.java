@@ -8,7 +8,7 @@ public class RandomMoveStrategy implements MoveStrategy {
 
     @Override
     public boolean shouldMove() {
-        return random.nextInt(10) >= 4;
+        return random.nextInt(10) >= 2;
     }
 
 }

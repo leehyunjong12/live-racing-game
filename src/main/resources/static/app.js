@@ -1,6 +1,7 @@
 const startButton = document.getElementById('startButton');
 const resetButton = document.getElementById('resetButton');
 const canvas = document.getElementById('raceCanvas');
+const roundCounter = document.getElementById('roundCounter');
 const ctx = canvas.getContext('2d');
 const JAIL_COORDS = { x: 50, y: 450 };
 const NODE_INFO = {
@@ -29,6 +30,7 @@ const NODE_INFO = {
         description: "슬라이드"
     }
 };
+let totalRounds = 0;
 
 let TRACK_MAP = {};
 let TRACK_LINES = [];
@@ -57,6 +59,9 @@ startButton.addEventListener('click', () => {
 
     const carNames = ["Pobi", "Crong", "Honux", "JK", "Luffy"];
     const rounds = 50;
+
+    totalRounds = rounds;
+    roundCounter.textContent = `남은 라운드: ${totalRounds}`;
     socket.send(`START:${carNames.join(',')}:${rounds}`);
 });
 
@@ -65,6 +70,9 @@ resetButton.addEventListener('click', () => {
     draw();
     startButton.disabled = false;
     startButton.textContent = "경주 시작!";
+
+    roundCounter.textContent = "남은 라운드: -";
+    totalRounds = 0; //
 });
 
 socket.onmessage = function(event) {
@@ -81,10 +89,13 @@ socket.onmessage = function(event) {
 
     } else if (data.type === "RACING") {
         updateCarPositions(data.cars);
+        const remainingRounds = totalRounds - data.round;
+        roundCounter.textContent = `남은 라운드: ${remainingRounds}`;
 
     } else if (data.type === "WINNER") {
         displayWinner(data.winners);
         startButton.disabled = false;
+        roundCounter.textContent = "남은 라운드: 0";
     }
 };
 
