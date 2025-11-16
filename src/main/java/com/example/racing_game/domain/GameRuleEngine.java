@@ -29,7 +29,7 @@ public class GameRuleEngine {
     private RuleResult handleSpecialTile(int position) {
         TileType tileType = MapDataStorage.SPECIAL_TILES.getOrDefault(position, TileType.NORMAL);
         switch (tileType) {
-            case OBSTACLE:
+            case JAIL:
                 return new RuleResult(position, 2);
             case MOVE_BACK_NODE:
                 // 30% 확률

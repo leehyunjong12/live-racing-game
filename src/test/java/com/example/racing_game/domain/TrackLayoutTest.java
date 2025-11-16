@@ -38,7 +38,7 @@ public class TrackLayoutTest {
 
         MapNode node23 = mapLayoutDto.nodes().get(23);
         assertThat(node23.id()).isEqualTo(23);
-        assertThat(node23.type()).isEqualTo(TileType.OBSTACLE);
+        assertThat(node23.type()).isEqualTo(TileType.JAIL);
 
         MapNode node1 = mapLayoutDto.nodes().get(1);
         assertThat(node1.id()).isEqualTo(1);
