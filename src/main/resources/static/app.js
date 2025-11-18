@@ -2,6 +2,8 @@ const startButton = document.getElementById('startButton');
 const resetButton = document.getElementById('resetButton');
 const canvas = document.getElementById('raceCanvas');
 const roundCounter = document.getElementById('roundCounter');
+const winnerBoard = document.getElementById('winnerBoard');
+const winnerList = document.getElementById('winnerList');
 const ctx = canvas.getContext('2d');
 const JAIL_COORDS = { x: 50, y: 450 };
 const NODE_INFO = {
@@ -70,9 +72,9 @@ resetButton.addEventListener('click', () => {
     draw();
     startButton.disabled = false;
     startButton.textContent = "경주 시작!";
-
+    winnerBoard.style.display = 'none';
     roundCounter.textContent = "남은 라운드: -";
-    totalRounds = 0; //
+    totalRounds = 0;
 });
 
 socket.onmessage = function(event) {
@@ -123,7 +125,26 @@ function updateCarPositions(carStates) {
 }
 
 function displayWinner(winners) {
-    alert(`🏆 최종 우승자: ${winners.join(', ')} 🏆`);
+    if (winners.length === 0) {
+        alert("🏆 아무도 결승선에 도착하지 못했습니다! 🏆");
+    } else {
+        alert(`🏆 최종 우승자: ${winners.join(', ')} 🏆`);
+    }
+    winnerList.innerHTML = '';
+
+    if (winners.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = "No Winners";
+        li.style.color = "#ccc";
+        winnerList.appendChild(li);
+    } else {
+        winners.forEach(name => {
+            const li = document.createElement('li');
+            li.textContent = `🥇 ${name}`;
+            winnerList.appendChild(li);
+        });
+    }
+    winnerBoard.style.display = 'block';
 }
 
 function draw() {
