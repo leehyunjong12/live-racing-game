@@ -4,6 +4,9 @@ const canvas = document.getElementById('raceCanvas');
 const roundCounter = document.getElementById('roundCounter');
 const winnerBoard = document.getElementById('winnerBoard');
 const winnerList = document.getElementById('winnerList');
+const resultModal = document.getElementById('resultModal');
+const modalWinnerList = document.getElementById('modalWinnerList');
+const closeModalBtn = document.getElementById('closeModalBtn');
 const ctx = canvas.getContext('2d');
 const JAIL_COORDS = { x: 50, y: 450 };
 const NODE_INFO = {
@@ -73,6 +76,7 @@ resetButton.addEventListener('click', () => {
     startButton.disabled = false;
     startButton.textContent = "경주 시작!";
     winnerBoard.style.display = 'none';
+    resultModal.style.display = 'none';
     roundCounter.textContent = "남은 라운드: -";
     totalRounds = 0;
 });
@@ -125,17 +129,34 @@ function updateCarPositions(carStates) {
 }
 
 function displayWinner(winners) {
-    if (winners.length === 0) {
-        alert("🏆 아무도 결승선에 도착하지 못했습니다! 🏆");
-    } else {
-        alert(`🏆 최종 우승자: ${winners.join(', ')} 🏆`);
-    }
-    winnerList.innerHTML = '';
+    showResultModal(winners);
 
+    if (winners.length > 0) {
+        shootConfetti();
+    }
+    updateSideBoard(winners);
+}
+function showResultModal(winners) {
+    modalWinnerList.innerHTML = '';
+
+    if (winners.length === 0) {
+        modalWinnerList.innerHTML = '<div class="modal-winner-name" style="color: gray;">No Winners...</div>';
+    } else {
+        winners.forEach(name => {
+            const div = document.createElement('div');
+            div.className = 'modal-winner-name';
+            div.textContent = `🥇 ${name}`;
+            modalWinnerList.appendChild(div);
+        });
+    }
+    resultModal.style.display = 'flex';
+}
+
+function updateSideBoard(winners) {
+    winnerList.innerHTML = '';
     if (winners.length === 0) {
         const li = document.createElement('li');
         li.textContent = "No Winners";
-        li.style.color = "#ccc";
         winnerList.appendChild(li);
     } else {
         winners.forEach(name => {
@@ -145,6 +166,33 @@ function displayWinner(winners) {
         });
     }
     winnerBoard.style.display = 'block';
+}
+closeModalBtn.addEventListener('click', () => {
+    resultModal.style.display = 'none';
+});
+
+function shootConfetti() {
+    const duration = 3000;
+    const end = Date.now() + duration;
+
+    (function frame() {
+        confetti({
+            particleCount: 5,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 }
+        });
+        confetti({
+            particleCount: 5,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 }
+        });
+
+        if (Date.now() < end) {
+            requestAnimationFrame(frame);
+        }
+    })();
 }
 
 function draw() {

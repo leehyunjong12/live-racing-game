@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>실시간 자동차 경주 (v2.0 - Graph)</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
 <div id="legend">
@@ -28,7 +29,13 @@
 <div id="canvasContainer">
     <canvas id="raceCanvas" width="1000" height="500"></canvas>
 </div>
-
+<div id="resultModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <h2>🏆 CONGRATULATIONS! 🏆</h2>
+        <div id="modalWinnerList"></div>
+        <button id="closeModalBtn">닫기</button>
+    </div>
+</div>
 <script src="app.js"></script>
 </body>
 </html>
