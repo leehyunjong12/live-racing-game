@@ -17,9 +17,15 @@ const NODE_INFO = {
     "MOVE_TO_MIDPOINTS": {color: "#9b59b6", border: "#8e44ad", description: "중간 지점 무작위 이동"},
     "SLIDE": {color: "#f1c40f", border: "#f39c12", description: "슬라이드"}
 };
-
+const INFINITE_LOOP_PATH = [7, 4, 10, 7];
+const LOOP_SEGMENTS = [
+    [7, 4],
+    [4, 10],
+    [10, 7]
+];
+let dashOffset = 0;
 let totalRounds = 0;
-
+const NODE_RADIUS = 15;
 let TRACK_MAP = {};
 let TRACK_LINES = [];
 let cars = {};
@@ -91,7 +97,7 @@ socket.onmessage = function (event) {
 function updateCarPositions(carStates) {
 
     carStates.forEach((carState, index) => {
-        const { name, position,turnsToSkip } = carState;
+        const {name, position, turnsToSkip} = carState;
         const targetCoords = TRACK_MAP[position];
         if (!targetCoords) return;
 
@@ -119,6 +125,7 @@ function displayWinner(winners) {
     }
     updateSideBoard(winners);
 }
+
 function showResultModal(winners) {
     modalWinnerList.innerHTML = '';
 
@@ -150,6 +157,7 @@ function updateSideBoard(winners) {
     }
     winnerBoard.style.display = 'block';
 }
+
 closeModalBtn.addEventListener('click', () => {
     resultModal.style.display = 'none';
 });
@@ -181,6 +189,7 @@ function shootConfetti() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawTrack();
+    drawLoopWarning();
     drawJailNode();
     drawCars();
     requestAnimationFrame(draw);
@@ -190,22 +199,33 @@ function drawTrack() {
     ctx.strokeStyle = "#555";
     ctx.lineWidth = 3;
     ctx.lineCap = "round";
+    ctx.setLineDash([]);
+
     TRACK_LINES.forEach(line => {
+        const isLoopSegment = LOOP_SEGMENTS.some(s =>
+            (s[0] === line[0] && s[1] === line[1]) || (s[0] === line[1] && s[1] === line[0])
+        );
+        if (isLoopSegment) {
+            return;
+        }
         const start = TRACK_MAP[line[0]];
         const end = TRACK_MAP[line[1]];
         if (start && end) {
+            const endpoints = calculateLineEndpoints(start, end, NODE_RADIUS);
+
             ctx.beginPath();
-            ctx.moveTo(start.x, start.y);
-            ctx.lineTo(end.x, end.y);
+            ctx.moveTo(endpoints.x1, endpoints.y1);
+            ctx.lineTo(endpoints.x2, endpoints.y2);
             ctx.stroke();
         }
     });
-
+    ctx.setLineDash([]);
     Object.values(TRACK_MAP).forEach(node => {
         const info = getNodeInfo(node.type);
+
         ctx.fillStyle = info.color;
         ctx.beginPath();
-        ctx.arc(node.x, node.y, 12, 0, 2 * Math.PI);
+        ctx.arc(node.x, node.y, NODE_RADIUS, 0, 2 * Math.PI);
         ctx.fill();
 
         ctx.strokeStyle = info.border;
@@ -218,9 +238,11 @@ function drawTrack() {
         ctx.fillText(node.id, node.x, node.y);
     });
 }
+
 function getNodeInfo(tileType) {
     return NODE_INFO[tileType] || NODE_INFO["NORMAL"];
 }
+
 function drawJailNode() {
     const info = NODE_INFO["JAIL"];
     ctx.fillStyle = info.color;
@@ -236,6 +258,49 @@ function drawJailNode() {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("JAIL", JAIL_COORDS.x, JAIL_COORDS.y);
+}
+
+function drawLoopWarning() {
+    dashOffset += 1.2;
+
+    ctx.strokeStyle = "rgba(85, 85, 85, 0.8)";
+    ctx.lineWidth = 3;
+    ctx.setLineDash([20, 10]);
+    ctx.lineDashOffset = -dashOffset;
+
+    for (let i = 0; i < INFINITE_LOOP_PATH.length - 1; i++) {
+        const start = TRACK_MAP[INFINITE_LOOP_PATH[i]];
+        const end = TRACK_MAP[INFINITE_LOOP_PATH[i + 1]];
+
+        if (start && end) {
+            const endpoints = calculateLineEndpoints(start, end, NODE_RADIUS);
+
+            ctx.beginPath();
+            ctx.moveTo(endpoints.x1, endpoints.y1);
+            ctx.lineTo(endpoints.x2, endpoints.y2);
+            ctx.stroke();
+        }
+    }
+
+    ctx.setLineDash([]);
+    ctx.lineWidth = 3;
+}
+
+function calculateLineEndpoints(startCoords, endCoords, radius) {
+    const dx = endCoords.x - startCoords.x;
+    const dy = endCoords.y - startCoords.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    const unitX = dx / dist;
+    const unitY = dy / dist;
+
+    const x1 = startCoords.x + unitX * radius;
+    const y1 = startCoords.y + unitY * radius;
+
+    const x2 = endCoords.x - unitX * radius;
+    const y2 = endCoords.y - unitY * radius;
+
+    return {x1, y1, x2, y2};
 }
 
 function drawCars() {
@@ -294,6 +359,7 @@ function populateLegend() {
         legendList.appendChild(li);
     }
 }
+
 document.addEventListener('DOMContentLoaded', (event) => {
     populateLegend();
 });
