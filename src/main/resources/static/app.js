@@ -8,33 +8,16 @@ const resultModal = document.getElementById('resultModal');
 const modalWinnerList = document.getElementById('modalWinnerList');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const ctx = canvas.getContext('2d');
-const JAIL_COORDS = { x: 50, y: 450 };
+const JAIL_COORDS = {x: 50, y: 450};
 const NODE_INFO = {
-    "NORMAL": {
-        color: "#FFFFFF",
-        description: "일반"
-    },
-    "JAIL": {
-        color: "#FF4136",
-        description: "2턴동안 감옥 (30% 확률)"
-    },
-    "MOVE_BACK_NODE": {
-        color: "#FF851B",
-        description: "현재 숫자 -2 위치로 (30% 확률)"
-    },
-    "MOVE_TO_START": {
-        color: "#0074D9",
-        description: "처음으로"
-    },
-    "MOVE_TO_MIDPOINTS": {
-        color: "#7FDBFF",
-        description: "중간지점중 랜덤 이동"
-    },
-    "SLIDE": {
-        color: "#FFDC00",
-        description: "슬라이드"
-    }
+    "NORMAL": {color: "#ecf0f1", border: "#bdc3c7", description: "일반"},
+    "JAIL": {color: "#e74c3c", border: "#c0392b", description: "2턴 감옥 (30% 확률)"},
+    "MOVE_BACK_NODE": {color: "#e67e22", border: "#d35400", description: "현재 노드 -2 위치로 (30% 확률)"},
+    "MOVE_TO_START": {color: "#3498db", border: "#2980b9", description: "출발점 복귀"},
+    "MOVE_TO_MIDPOINTS": {color: "#9b59b6", border: "#8e44ad", description: "중간 지점 무작위 이동"},
+    "SLIDE": {color: "#f1c40f", border: "#f39c12", description: "슬라이드"}
 };
+
 let totalRounds = 0;
 
 let TRACK_MAP = {};
@@ -44,18 +27,18 @@ const carColors = ["#d9534f", "#5cb85c", "#0275d8", "#f0ad4e", "#5bc0de"];
 
 const socket = new WebSocket("ws://localhost:8080/ws/race");
 
-socket.onopen = function(event) {
+socket.onopen = function (event) {
     console.log("서버에 연결되었습니다.");
 
 };
 
-socket.onclose = function(event) {
+socket.onclose = function (event) {
     console.log("서버와 연결이 끊겼습니다.");
     startButton.disabled = true;
     startButton.textContent = "서버 연결 중...";
 };
 
-socket.onerror = function(error) {
+socket.onerror = function (error) {
     console.error("WebSocket 오류 발생:", error);
 };
 startButton.addEventListener('click', () => {
@@ -81,7 +64,7 @@ resetButton.addEventListener('click', () => {
     totalRounds = 0;
 });
 
-socket.onmessage = function(event) {
+socket.onmessage = function (event) {
     const data = JSON.parse(event.data);
 
     if (data.type === "MAP_LAYOUT") {
@@ -180,13 +163,13 @@ function shootConfetti() {
             particleCount: 5,
             angle: 60,
             spread: 55,
-            origin: { x: 0 }
+            origin: {x: 0}
         });
         confetti({
             particleCount: 5,
             angle: 120,
             spread: 55,
-            origin: { x: 1 }
+            origin: {x: 1}
         });
 
         if (Date.now() < end) {
@@ -204,8 +187,9 @@ function draw() {
 }
 
 function drawTrack() {
-    ctx.strokeStyle = "#888";
+    ctx.strokeStyle = "#555";
     ctx.lineWidth = 3;
+    ctx.lineCap = "round";
     TRACK_LINES.forEach(line => {
         const start = TRACK_MAP[line[0]];
         const end = TRACK_MAP[line[1]];
@@ -218,33 +202,37 @@ function drawTrack() {
     });
 
     Object.values(TRACK_MAP).forEach(node => {
-        ctx.fillStyle = getNodeColor(node.type);
+        const info = getNodeInfo(node.type);
+        ctx.fillStyle = info.color;
         ctx.beginPath();
-        ctx.arc(node.x, node.y, 10, 0, 2 * Math.PI);
+        ctx.arc(node.x, node.y, 12, 0, 2 * Math.PI);
         ctx.fill();
 
-        ctx.fillStyle = "#000";
-        ctx.font = "10px Arial";
+        ctx.strokeStyle = info.border;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = "#333";
+        ctx.font = "bold 12px 'Patrick Hand'";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(node.id, node.x, node.y);
     });
 }
-function getNodeColor(tileType) {
-    const info = NODE_INFO[tileType];
-    if (info) {
-        return info.color;
-    }
-    return NODE_INFO["NORMAL"].color;
+function getNodeInfo(tileType) {
+    return NODE_INFO[tileType] || NODE_INFO["NORMAL"];
 }
 function drawJailNode() {
-    ctx.fillStyle = "#FF0000";
+    const info = NODE_INFO["JAIL"];
+    ctx.fillStyle = info.color;
     ctx.beginPath();
-    ctx.arc(JAIL_COORDS.x, JAIL_COORDS.y, 10, 0, 2 * Math.PI);
+    ctx.arc(JAIL_COORDS.x, JAIL_COORDS.y, 15, 0, 2 * Math.PI);
     ctx.fill();
 
+    ctx.strokeStyle = info.border;
+    ctx.lineWidth = 3;
+    ctx.stroke();
     ctx.fillStyle = "#FFF";
-    ctx.font = "10px Arial";
+    ctx.font = "bold 12px 'Patrick Hand'";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("JAIL", JAIL_COORDS.x, JAIL_COORDS.y);
@@ -254,36 +242,36 @@ function drawCars() {
     let jailCount = 0;
 
     Object.values(cars).forEach(car => {
-
         if (car.turnsToSkip > 0) {
-            const x = JAIL_COORDS.x + 30 + (jailCount * 30);
+            const x = JAIL_COORDS.x + 40 + (jailCount * 40);
             const y = JAIL_COORDS.y;
 
             drawCar(car, x, y);
 
-            ctx.fillStyle = "red";
-            ctx.font = "bold 12px Arial";
-            ctx.fillText(`SKIP (${car.turnsToSkip})`, x, y + 15);
-
+            ctx.fillStyle = "#e74c3c";
+            ctx.font = "bold 14px 'Patrick Hand'";
+            ctx.fillText(`SKIP (${car.turnsToSkip})`, x, y + 25);
             jailCount++;
-
         } else {
-
             drawCar(car, car.x, car.y);
         }
     });
 }
 
-
 function drawCar(car, x, y) {
     ctx.fillStyle = car.color;
     ctx.beginPath();
-    ctx.arc(x, y, 8, 0, 2 * Math.PI);
+    ctx.arc(x, y, 10, 0, 2 * Math.PI);
     ctx.fill();
 
-    ctx.fillStyle = "#FFF";
-    ctx.font = "10px Arial";
-    ctx.fillText(car.name, x, y - 15);
+    ctx.strokeStyle = "#333";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = "#333";
+    ctx.font = "bold 16px 'Patrick Hand'";
+    ctx.textAlign = "center";
+    ctx.fillText(car.name, x, y - 18);
 }
 
 function populateLegend() {
