@@ -363,3 +363,100 @@ function populateLegend() {
 document.addEventListener('DOMContentLoaded', (event) => {
     populateLegend();
 });
+
+const authBar = {
+    loggedOut: document.getElementById('loggedOutView'),
+    loggedIn: document.getElementById('loggedInView'),
+};
+
+const modals = {
+    login: document.getElementById('loginModal'),
+    register: document.getElementById('registerModal')
+};
+
+document.getElementById('btnShowLogin').addEventListener('click', () => openModal('login'));
+document.getElementById('btnShowRegister').addEventListener('click', () => openModal('register'));
+document.querySelectorAll('.btn-close-modal').forEach(btn => {
+    btn.addEventListener('click', closeAllModals);
+});
+
+document.getElementById('linkToRegister').addEventListener('click', () => openModal('register'));
+document.getElementById('linkToLogin').addEventListener('click', () => openModal('login'));
+
+function openModal(type) {
+    closeAllModals();
+    modals[type].style.display = 'flex';
+}
+
+function closeAllModals() {
+    modals.login.style.display = 'none';
+    modals.register.style.display = 'none';
+    document.querySelectorAll('.sketch-input').forEach(input => input.value = '');
+}
+
+document.getElementById('btnRegisterAction').addEventListener('click', () => {
+    const username = document.getElementById('regUsername').value;
+    const password = document.getElementById('regPassword').value;
+
+    if (!username || !password) {
+        alert("아이디와 비밀번호를 입력해주세요.");
+        return;
+    }
+
+    fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    })
+        .then(async response => {
+            const msg = await response.text();
+            if (response.ok) {
+                alert("가입 성공! 로그인해주세요.");
+                openModal('login');
+            } else {
+                alert("가입 실패: " + msg);
+            }
+        })
+        .catch(err => console.error(err));
+});
+
+document.getElementById('btnLoginAction').addEventListener('click', () => {
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
+
+    fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    })
+        .then(async response => {
+            const msg = await response.text();
+            if (response.ok) {
+                alert("환영합니다! " + username + "님");
+                closeAllModals();
+                updateAuthUI(true);
+            } else {
+                alert("로그인 실패: " + msg);
+            }
+        })
+        .catch(err => console.error(err));
+});
+
+document.getElementById('btnLogout').addEventListener('click', () => {
+    fetch('/api/auth/logout', { method: 'POST' })
+        .then(() => {
+            alert("로그아웃 되었습니다.");
+            updateAuthUI(false);
+        });
+});
+
+function updateAuthUI(isLoggedIn) {
+    if (isLoggedIn) {
+        authBar.loggedOut.style.display = 'none';
+        authBar.loggedIn.style.display = 'block';
+
+    } else {
+        authBar.loggedOut.style.display = 'block';
+        authBar.loggedIn.style.display = 'none';
+    }
+}
