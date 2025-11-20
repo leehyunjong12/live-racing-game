@@ -28,11 +28,9 @@ public class AuthService {
         String rawPassword = request.getPassword();
         String encodedPassword = passwordEncoder.encode(rawPassword);
 
-        String prefixedPassword = "{bcrypt}" + encodedPassword;
-
         User newUser = new User();
         newUser.setUsername(request.getUsername());
-        newUser.setPassword(prefixedPassword);
+        newUser.setPassword(encodedPassword);
 
         return userRepository.save(newUser);
     }

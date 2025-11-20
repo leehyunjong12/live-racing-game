@@ -48,7 +48,7 @@ public class AuthServiceTest {
     };
 
     @Test
-    @DisplayName("성공적인 회원가입 시, 비밀번호는 암호화되어 {bcrypt} 접두사와 함께 저장")
+    @DisplayName("성공적인 회원가입 시, 비밀번호는 암호화되어  저장")
     void shouldRegisterNewUserSuccessfully() {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
         when(passwordEncoder.encode(any(CharSequence.class))).thenReturn("ENCODED_HASH");
@@ -61,7 +61,7 @@ public class AuthServiceTest {
 
         User savedUser = userCaptor.getValue();
         assertThat(savedUser.getUsername()).isEqualTo("testuser");
-        assertThat(savedUser.getPassword()).isEqualTo("{bcrypt}ENCODED_HASH");
+        assertThat(savedUser.getPassword()).isEqualTo("ENCODED_HASH");
         assertThat(savedUser.getBalance()).isEqualTo(100000);
     }
 
