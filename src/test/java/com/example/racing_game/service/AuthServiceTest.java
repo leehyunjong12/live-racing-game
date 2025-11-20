@@ -3,6 +3,7 @@ package com.example.racing_game.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,6 +18,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 
@@ -28,6 +33,9 @@ public class AuthServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private AuthenticationManager authenticationManager;
 
     @InjectMocks
     private AuthService authService;
@@ -68,4 +76,33 @@ public class AuthServiceTest {
 
         verify(userRepository, never()).save(any());
     }
+    @Test
+    @DisplayName("로그인 시 AuthenticationManager를 호출하고 인증 객체를 반환해야 한다")
+    void shouldLoginSuccessfully() {
+        String username = "testuser";
+        String password = "password";
+        Authentication expectedAuth = mock(Authentication.class);
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(expectedAuth);
+
+        Authentication result = authService.login(username, password);
+
+        assertThat(result).isEqualTo(expectedAuth);
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+    }
+
+    @Test
+    @DisplayName("로그인 실패 시 예외를 던져야 한다")
+    void shouldThrowExceptionWhenLoginFails() {
+        String username = "wronguser";
+        String password = "wrongpassword";
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow(new BadCredentialsException("Invalid credentials"));
+
+        assertThrows(BadCredentialsException.class,
+                () -> authService.login(username, password));
+    }
+
 }

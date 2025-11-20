@@ -4,6 +4,9 @@ import com.example.racing_game.domain.User;
 import com.example.racing_game.dto.RegisterRequest;
 import com.example.racing_game.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +17,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
 
     @Transactional
     public User registerNewUser(RegisterRequest request) {
@@ -31,5 +35,11 @@ public class AuthService {
         newUser.setPassword(prefixedPassword);
 
         return userRepository.save(newUser);
+    }
+    public Authentication login(String username, String password) {
+        UsernamePasswordAuthenticationToken token =
+                new UsernamePasswordAuthenticationToken(username, password);
+
+        return authenticationManager.authenticate(token);
     }
 }
