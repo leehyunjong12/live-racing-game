@@ -368,6 +368,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 const authBar = {
     loggedOut: document.getElementById('loggedOutView'),
     loggedIn: document.getElementById('loggedInView'),
+    btnCharge: document.getElementById('btnCharge'),
     userDisplay: document.getElementById('userDisplay'),
 };
 
@@ -484,6 +485,66 @@ document.getElementById('btnLogout').addEventListener('click', () => {
             updateAuthUI(false);
         });
 });
+authBar.btnCharge.addEventListener('click', () => {
+    fetch('/api/payment/balance')
+        .then(res => res.json())
+        .then(async data => {
+            const currentBalance = data.balance;
+
+            const { value: amount } = await Swal.fire({
+                title: '내 지갑',
+                html: `
+                    <div style="font-size: 1.2em; margin-bottom: 10px;">
+                        현재 잔액: <b style="color: #27ae60;">${currentBalance.toLocaleString()}원</b>
+                    </div>
+                    <div style="font-size: 0.9em; color: #666;">얼마를 충전할까요?</div>
+                `,
+                input: 'number',
+                inputValue: 50000,
+                inputAttributes: {
+                    min: '50000',
+                    step: '50000',
+                    placeholder: '금액 입력 (예: 50000)'
+                },
+                showCancelButton: true,
+                confirmButtonText: '충전하기',
+                cancelButtonText: '닫기',
+                inputValidator: (value) => {
+                    if (!value || value <= 0) {
+                        return '올바른 금액을 입력해주세요!';
+                    }
+                }
+            });
+            if (amount) {
+                chargeBalance(amount);
+            }
+        })
+        .catch(() => {
+            Swal.fire('오류', '잔액 정보를 불러오지 못했습니다.', 'error');
+        });
+});
+
+function chargeBalance(amount) {
+    fetch('/api/payment/charge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: parseInt(amount) })
+    })
+        .then(async response => {
+            if (response.ok) {
+                const data = await response.json();
+                Swal.fire({
+                    icon: 'success',
+                    title: '충전 완료!',
+                    html: `충전 후 잔액: <b>${data.balance.toLocaleString()}원</b>`,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire('충전 실패', '오류가 발생했습니다.', 'error');
+            }
+        });
+}
 
 function updateAuthUI(isLoggedIn, username = '') {
     if (isLoggedIn) {
