@@ -363,6 +363,7 @@ function populateLegend() {
 
 document.addEventListener('DOMContentLoaded', (event) => {
     populateLegend();
+    checkLoginStatus();
 });
 
 const authBar = {
@@ -555,4 +556,23 @@ function updateAuthUI(isLoggedIn, username = '') {
         authBar.loggedOut.style.display = 'flex';
         authBar.loggedIn.style.display = 'none';
     }
+}
+function checkLoginStatus() {
+    fetch('/api/auth/me', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error("로그인 안 됨");
+        })
+        .then(data => {
+            const username = data.username;
+            updateAuthUI(true, username);
+        })
+        .catch(() => {
+            updateAuthUI(false);
+        });
 }
