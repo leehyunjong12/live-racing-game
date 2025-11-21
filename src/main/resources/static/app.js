@@ -370,6 +370,7 @@ const authBar = {
     loggedOut: document.getElementById('loggedOutView'),
     loggedIn: document.getElementById('loggedInView'),
     btnCharge: document.getElementById('btnCharge'),
+    btnRegisterCar: document.getElementById('btnRegisterCar'),
     userDisplay: document.getElementById('userDisplay'),
 };
 
@@ -545,6 +546,66 @@ function chargeBalance(amount) {
                 Swal.fire('충전 실패', '오류가 발생했습니다.', 'error');
             }
         });
+}
+authBar.btnRegisterCar.addEventListener('click', async () => {
+
+    const { value: quantity } = await Swal.fire({
+        title: '레이싱 참가 신청',
+        html: `
+            <p>참가비: <b>1대당 50,000원</b></p>
+            <p style="font-size:0.9em; color:#666;">자동으로 닉네임_번호로 등록됩니다.</p>
+        `,
+        input: 'number',
+        inputValue: 1,
+        inputAttributes: {
+            min: '1',
+            max: '10',
+            step: '1'
+        },
+        showCancelButton: true,
+        confirmButtonText: '등록 및 결제',
+        cancelButtonText: '취소',
+        inputValidator: (value) => {
+            if (!value || value <= 0) return '최소 1대 이상 입력해야 합니다!';
+        }
+    });
+
+    if (quantity) {
+        const totalCost = quantity * 50000;
+
+        const confirm = await Swal.fire({
+            title: '결제 확인',
+            html: `
+                총 <b>${quantity}대</b>를 등록하시겠습니까?<br>
+                참가비 <b>${totalCost.toLocaleString()}원</b>이 차감됩니다.
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '네, 결제합니다!'
+        });
+
+        if (confirm.isConfirmed) {
+            registerCarsAPI(parseInt(quantity));
+        }
+    }
+});
+
+function registerCarsAPI(quantity) {
+    fetch('/api/cars/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity: quantity })
+    })
+        .then(async response => {
+            const data = await response.json();
+            if (response.ok) {
+                Swal.fire('등록 성공!', `${quantity}대가 출전 명단에 올랐습니다.`, 'success');
+                checkLoginStatus();
+            } else {
+                Swal.fire('등록 실패', data.error || '오류가 발생했습니다.', 'error');
+            }
+        })
+        .catch(() => Swal.fire('오류', '서버와 통신할 수 없습니다.', 'error'));
 }
 
 function updateAuthUI(isLoggedIn, username = '') {

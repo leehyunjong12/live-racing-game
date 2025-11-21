@@ -269,6 +269,14 @@ button:active:not(:disabled) {
     background: #f39c12 !important;
     transform: translate(-1px, -1px);
 }
+#btnRegisterCar {
+    background-color: #FF4136;
+    border-color: #c0392b;
+}
+
+#btnRegisterCar:hover {
+    background-color: #e74c3c;
+}
 #userDisplay {
     display: inline-block;
     font-size: 1.1em;
