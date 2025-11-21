@@ -1,6 +1,8 @@
 package com.example.racing_game.controller;
 
 import com.example.racing_game.domain.User;
+import com.example.racing_game.repository.UserCarRepository;
+import com.example.racing_game.repository.UserRepository;
 import com.example.racing_game.dto.LoginRequest;
 import com.example.racing_game.dto.RegisterRequest;
 import com.example.racing_game.service.AuthService;
@@ -35,6 +37,8 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final SecurityContextRepository securityContextRepository =
             new HttpSessionSecurityContextRepository();
+    private final UserRepository userRepository;
+    private final UserCarRepository userCarRepository;
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
@@ -76,8 +80,15 @@ public class AuthController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        String username = userDetails.getUsername();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        long carCount = userCarRepository.countByOwner(user);
 
-        return ResponseEntity.ok(Map.of("username", userDetails.getUsername()));
+        return ResponseEntity.ok(Map.of(
+                "username", username,
+                "carCount", carCount
+        ));
     }
 
 }

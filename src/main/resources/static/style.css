@@ -277,6 +277,20 @@ button:active:not(:disabled) {
 #btnRegisterCar:hover {
     background-color: #e74c3c;
 }
+#carCountDisplay {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #e67e22;
+    background: #fff;
+    padding: 4px 10px;
+    margin-right: 8px;
+
+
+    border: 2px solid #333;
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    cursor: default;
+}
 #userDisplay {
     display: inline-block;
     font-size: 1.1em;

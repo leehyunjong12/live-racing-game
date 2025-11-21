@@ -383,6 +383,7 @@ const authBar = {
     loggedIn: document.getElementById('loggedInView'),
     btnCharge: document.getElementById('btnCharge'),
     btnRegisterCar: document.getElementById('btnRegisterCar'),
+    carCountDisplay: document.getElementById('carCountDisplay'),
     userDisplay: document.getElementById('userDisplay'),
 };
 
@@ -473,8 +474,7 @@ document.getElementById('btnLoginAction').addEventListener('click', () => {
                     showConfirmButton: false
                 });
                 closeAllModals();
-                currentUser = username;
-                updateAuthUI(true,username);
+                checkLoginStatus();
             } else {
                 Swal.fire({
                     icon: 'error',
@@ -621,11 +621,12 @@ function registerCarsAPI(quantity) {
         .catch(() => Swal.fire('오류', '서버와 통신할 수 없습니다.', 'error'));
 }
 
-function updateAuthUI(isLoggedIn, username = '') {
+function updateAuthUI(isLoggedIn, username = '',carCount = 0) {
     if (isLoggedIn) {
         authBar.loggedOut.style.display = 'none';
         authBar.loggedIn.style.display = 'flex';
         authBar.userDisplay.textContent = `👤 ${username}`;
+        authBar.carCountDisplay.textContent = `🏎️ ${carCount}대`;
     } else {
         authBar.loggedOut.style.display = 'flex';
         authBar.loggedIn.style.display = 'none';
@@ -645,7 +646,8 @@ function checkLoginStatus() {
         .then(data => {
             const username = data.username;
             currentUser = username;
-            updateAuthUI(true, username);
+            const carCount = data.carCount || 0;
+            updateAuthUI(true, username,carCount);
         })
         .catch(() => {
             updateAuthUI(false);
