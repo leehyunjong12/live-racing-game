@@ -37,6 +37,9 @@ public class RaceServiceTest {
     @Mock
     private GameRuleEngine gameRuleEngine;
 
+    @Mock
+    private PrizeService prizeService;
+
     @InjectMocks
     private RaceService raceService;
 
@@ -152,5 +155,26 @@ public class RaceServiceTest {
 
         List<String> winners = (List<String>) winnerMap.get("winners");
         assertThat(winners).isEmpty();
+    }@Test
+    @DisplayName("경주 종료 시 PrizeService를 호출하여 정산하고, 그 후에 방송")
+    void shouldCallPrizeServiceBeforeBroadcastingWinner() throws JsonProcessingException {
+        List<String> carNames = List.of("Pobi");
+        int rounds = 10;
+        Consumer<String> broadcaster = mock(Consumer.class);
+
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+        when(moveStrategy.shouldMove()).thenReturn(true);
+
+        when(gameRuleEngine.getNextPosition(eq(0), eq(true)))
+                .thenReturn(new RuleResult(MapDataStorage.TRACK_LENGTH, 0));
+
+        raceService.startAsyncRace(carNames, rounds, broadcaster);
+
+
+        var inOrder = inOrder(prizeService, broadcaster);
+
+        inOrder.verify(prizeService).awardWinnersAndReset(anyList());
+        inOrder.verify(broadcaster).accept(anyString());
     }
+
 }

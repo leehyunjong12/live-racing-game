@@ -1,7 +1,7 @@
 package com.example.racing_game.service;
 
 import com.example.racing_game.domain.Car;
-import com.example.racing_game.domain.GameRuleEngine; 
+import com.example.racing_game.domain.GameRuleEngine;
 import com.example.racing_game.domain.MoveStrategy;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,11 +17,14 @@ public class RaceService {
     private final ObjectMapper objectMapper;
     private final MoveStrategy moveStrategy;
     private final GameRuleEngine gameRuleEngine;
+    private final PrizeService prizeService;
 
-    public RaceService(ObjectMapper objectMapper, MoveStrategy moveStrategy, GameRuleEngine gameRuleEngine) {
+    public RaceService(ObjectMapper objectMapper, MoveStrategy moveStrategy, GameRuleEngine gameRuleEngine,
+                       PrizeService prizeService) {
         this.objectMapper = objectMapper;
         this.moveStrategy = moveStrategy;
         this.gameRuleEngine = gameRuleEngine;
+        this.prizeService = prizeService;
     }
 
     @Async
@@ -51,15 +54,21 @@ public class RaceService {
             String roundResultJson = createJsonState(i + 1, cars);
             broadcaster.accept(roundResultJson);
 
-            try { Thread.sleep(1000); }
-            catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
 
             if (isRaceFinished(cars)) {
                 break;
             }
         }
-        String finalResultJson = createWinnerJson(cars);
+        List<String> winners = calculateWinners(cars);
+        prizeService.awardWinnersAndReset(winners);
+        String finalResultJson = createWinnerJson(winners);
         broadcaster.accept(finalResultJson);
+
     }
 
     private boolean isRaceFinished(List<Car> cars) {
@@ -73,7 +82,8 @@ public class RaceService {
                     map.put("name", car.getName());
                     map.put("position", car.getPosition());
                     map.put("turnsToSkip", car.getTurnsToSkip());
-                    return map;})
+                    return map;
+                })
                 .toList();
         Map<String, Object> jsonMap = Map.of(
                 "type", "RACING", "round", round, "cars", carStates
@@ -84,16 +94,21 @@ public class RaceService {
             return "{\"type\":\"ERROR\", \"message\":\"JSON 생성 실패\"}";
         }
     }
-    private String createWinnerJson(List<Car> cars) {
+
+    private List<String> calculateWinners(List<Car> cars) {
         int maxPosition = cars.stream().mapToInt(Car::getPosition).max().orElse(0);
-        List<String> winners;
+
         if (maxPosition < GameRuleEngine.TRACK_LENGTH) {
-            winners = List.of();
-        } else {
-            winners = cars.stream()
-                    .filter(car -> car.getPosition() == maxPosition)
-                    .map(Car::getName).toList();
+            return List.of();
         }
+
+        return cars.stream()
+                .filter(car -> car.getPosition() == maxPosition)
+                .map(Car::getName)
+                .toList();
+    }
+
+    private String createWinnerJson(List<String> winners) {
         Map<String, Object> jsonMap = Map.of("type", "WINNER", "winners", winners);
         try {
             return objectMapper.writeValueAsString(jsonMap);

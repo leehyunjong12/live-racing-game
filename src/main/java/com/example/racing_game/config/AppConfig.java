@@ -8,6 +8,8 @@ import com.example.racing_game.domain.TrackLayout;
 import com.example.racing_game.service.RaceService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.racing_game.repository.UserCarRepository;
+import com.example.racing_game.repository.PrizePoolRepository;
+import com.example.racing_game.service.PrizeService;
 
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 public class AppConfig implements WebSocketConfigurer {
 
     private final UserCarRepository userCarRepository;
+    private final PrizePoolRepository prizePoolRepository;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
@@ -56,8 +59,13 @@ public class AppConfig implements WebSocketConfigurer {
     }
 
     @Bean
+    public PrizeService prizeService() {
+        return new PrizeService(prizePoolRepository, userCarRepository);
+    }
+
+    @Bean
     public RaceService raceService() {
-        return new RaceService(objectMapper(), moveStrategy(), gameRuleEngine());
+        return new RaceService(objectMapper(), moveStrategy(), gameRuleEngine(), prizeService());
     }
 
     @Bean

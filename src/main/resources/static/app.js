@@ -96,6 +96,7 @@ socket.onmessage = function (event) {
         displayWinner(data.winners);
         startButton.disabled = false;
         roundCounter.textContent = "남은 라운드: 0";
+        checkLoginStatus();
     }
 };
 
@@ -130,15 +131,53 @@ function updateCarPositions(carStates) {
     });
 }
 
+
 function displayWinner(winners) {
-    showResultModal(winners);
+    const adminWins = winners.includes("Admin_Bot");
 
-    if (winners.length > 0) {
+    if (adminWins && winners.length === 1) {
+        Swal.fire({
+            icon: 'info',
+            title: '🤖 Admin_Bot 승리!',
+            html: `
+                <b style="color: red;">플레이어 전원 패배!</b><br>
+                <span style="font-size: 0.9em;">판돈은 다음 경기로 <b>이월(Carry Over)</b>됩니다.</span>
+            `,
+            confirmButtonText: '다음 기회에...',
+            background: '#fff',
+            backdrop: `rgba(0,0,0,0.8)`
+        });
+
+    } else if (adminWins && winners.length > 1) {
         shootConfetti();
-    }
-    updateSideBoard(winners);
-}
+        Swal.fire({
+            icon: 'warning',
+            title: '🤝 공동 우승!',
+            html: `
+                Admin과 비겼습니다!<br>
+                상금은 <b style="color: blue;">1/${winners.length}</b>로 나뉩니다.<br>
+                (Admin 몫은 회수됩니다)
+            `,
+            confirmButtonText: '확인'
+        });
 
+    } else {
+        if (winners.length > 0) {
+            shootConfetti();
+            showResultModal(winners);
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'TIME OVER',
+                text: '아무도 결승선에 도착하지 못했습니다.',
+                confirmButtonText: '아쉽네요'
+            });
+        }
+    }
+
+    updateSideBoard(winners);
+    checkLoginStatus();
+}
 function showResultModal(winners) {
     modalWinnerList.innerHTML = '';
 
@@ -154,20 +193,29 @@ function showResultModal(winners) {
     }
     resultModal.style.display = 'flex';
 }
-
 function updateSideBoard(winners) {
     winnerList.innerHTML = '';
+
     if (winners.length === 0) {
-        const li = document.createElement('li');
-        li.textContent = "No Winners";
-        winnerList.appendChild(li);
-    } else {
-        winners.forEach(name => {
-            const li = document.createElement('li');
-            li.textContent = `🥇 ${name}`;
-            winnerList.appendChild(li);
-        });
+        winnerList.innerHTML = '<li>No Winners</li>';
+        winnerBoard.style.display = 'block';
+        return;
     }
+
+    winners.forEach(name => {
+        const li = document.createElement('li');
+
+        if (name === "Admin_Bot") {
+            li.textContent = `🤖 ${name}`;
+            li.style.color = "#333";
+            li.style.borderLeft = "4px solid #333";
+        } else {
+            li.textContent = `🥇 ${name}`;
+        }
+
+        winnerList.appendChild(li);
+    });
+
     winnerBoard.style.display = 'block';
 }
 
@@ -626,7 +674,7 @@ function updateAuthUI(isLoggedIn, username = '',carCount = 0) {
         authBar.loggedOut.style.display = 'none';
         authBar.loggedIn.style.display = 'flex';
         authBar.userDisplay.textContent = `👤 ${username}`;
-        authBar.carCountDisplay.textContent = `🏎️ ${carCount}대`;
+        authBar.carCountDisplay.textContent = `🚘 ${carCount}대`;
     } else {
         authBar.loggedOut.style.display = 'flex';
         authBar.loggedIn.style.display = 'none';

@@ -2,6 +2,7 @@ package com.example.racing_game.repository;
 
 import com.example.racing_game.domain.User;
 import com.example.racing_game.domain.UserCar;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,5 +55,21 @@ class UserCarRepositoryTest {
 
         assertThat(count1).isEqualTo(2);
         assertThat(count2).isEqualTo(1);
+    }
+    @Test
+    @DisplayName("자동차 이름으로 자동차와 소유자 정보를 찾을 수 있어야 함")
+    void shouldFindCarByName() {
+        User user = new User();
+        user.setUsername("racer");
+        user.setPassword("pass");
+        userRepository.save(user);
+
+        UserCar car = new UserCar("racer_1", user);
+        userCarRepository.save(car);
+
+        Optional<UserCar> foundCar = userCarRepository.findByCarName("racer_1");
+
+        assertThat(foundCar).isPresent();
+        assertThat(foundCar.get().getOwner().getUsername()).isEqualTo("racer");
     }
 }
