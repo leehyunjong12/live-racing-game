@@ -368,6 +368,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 const authBar = {
     loggedOut: document.getElementById('loggedOutView'),
     loggedIn: document.getElementById('loggedInView'),
+    userDisplay: document.getElementById('userDisplay'),
 };
 
 const modals = {
@@ -457,7 +458,7 @@ document.getElementById('btnLoginAction').addEventListener('click', () => {
                     showConfirmButton: false
                 });
                 closeAllModals();
-                updateAuthUI(true);
+                updateAuthUI(true,username);
             } else {
                 Swal.fire({
                     icon: 'error',
@@ -484,13 +485,13 @@ document.getElementById('btnLogout').addEventListener('click', () => {
         });
 });
 
-function updateAuthUI(isLoggedIn) {
+function updateAuthUI(isLoggedIn, username = '') {
     if (isLoggedIn) {
         authBar.loggedOut.style.display = 'none';
-        authBar.loggedIn.style.display = 'block';
-
+        authBar.loggedIn.style.display = 'flex';
+        authBar.userDisplay.textContent = `👤 ${username}`;
     } else {
-        authBar.loggedOut.style.display = 'block';
+        authBar.loggedOut.style.display = 'flex';
         authBar.loggedIn.style.display = 'none';
     }
 }
