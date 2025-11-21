@@ -291,3 +291,28 @@ button:active:not(:disabled) {
     font-weight: bold;
     border-bottom: 2px dashed #3498db;
 }
+
+div:where(.swal2-container) div:where(.swal2-popup) {
+    font-family: 'Patrick Hand', cursive !important;
+    background: #fff !important;
+    border: 3px solid #333 !important;
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
+    box-shadow: 10px 10px 0 rgba(0,0,0,0.1) !important;
+}
+div:where(.swal2-container) h2:where(.swal2-title) {
+    color: #2c3e50 !important;
+    font-size: 2em !important;
+    text-shadow: none !important;
+}
+div:where(.swal2-container) button:where(.swal2-styled).swal2-confirm {
+    background-color: #3498db !important;
+    color: #fff !important;
+    border: 2px solid #2980b9 !important;
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
+    box-shadow: 4px 4px 0 #2980b9 !important;
+    font-size: 1.2em !important;
+    padding: 10px 30px !important;
+    outline: none !important;
+}
+.swal2-success-ring { border-color: #2ecc71 !important; }
+.swal2-error-x-mark-line-left, .swal2-error-x-mark-line-right { background-color: #e74c3c !important; }

@@ -1,3 +1,4 @@
+/* global Swal */
 const startButton = document.getElementById('startButton');
 const resetButton = document.getElementById('resetButton');
 const canvas = document.getElementById('raceCanvas');
@@ -399,7 +400,12 @@ document.getElementById('btnRegisterAction').addEventListener('click', () => {
     const password = document.getElementById('regPassword').value;
 
     if (!username || !password) {
-        alert("아이디와 비밀번호를 입력해주세요.");
+        Swal.fire({
+            icon: 'warning',
+            title: '잠깐!',
+            text: '아이디와 비밀번호를 모두 입력해주세요.',
+            confirmButtonText: '알겠어요'
+        });
         return;
     }
 
@@ -411,10 +417,21 @@ document.getElementById('btnRegisterAction').addEventListener('click', () => {
         .then(async response => {
             const msg = await response.text();
             if (response.ok) {
-                alert("가입 성공! 로그인해주세요.");
-                openModal('login');
+                Swal.fire({
+                    icon: 'success',
+                    title: '가입 성공!',
+                    text: '이제 로그인해주세요.',
+                    confirmButtonText: '확인'
+                }).then(() => {
+                    openModal('login');
+                });
             } else {
-                alert("가입 실패: " + msg);
+                Swal.fire({
+                    icon: 'error',
+                    title: '가입 실패',
+                    text: msg,
+                    confirmButtonText: '다시 시도'
+                });
             }
         })
         .catch(err => console.error(err));
@@ -432,11 +449,22 @@ document.getElementById('btnLoginAction').addEventListener('click', () => {
         .then(async response => {
             const msg = await response.text();
             if (response.ok) {
-                alert("환영합니다! " + username + "님");
+                Swal.fire({
+                    icon: 'success',
+                    title: '환영합니다!',
+                    text: username + '님, 환영합니다.',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
                 closeAllModals();
                 updateAuthUI(true);
             } else {
-                alert("로그인 실패: " + msg);
+                Swal.fire({
+                    icon: 'error',
+                    title: '로그인 실패',
+                    text: msg,
+                    confirmButtonText: '확인'
+                });
             }
         })
         .catch(err => console.error(err));
@@ -445,7 +473,13 @@ document.getElementById('btnLoginAction').addEventListener('click', () => {
 document.getElementById('btnLogout').addEventListener('click', () => {
     fetch('/api/auth/logout', { method: 'POST' })
         .then(() => {
-            alert("로그아웃 되었습니다.");
+            Swal.fire({
+                icon: 'info',
+                title: '로그아웃',
+                text: '안녕히 가세요!',
+                timer: 1000,
+                showConfirmButton: false
+            });
             updateAuthUI(false);
         });
 });
