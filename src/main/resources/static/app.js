@@ -30,7 +30,12 @@ const NODE_RADIUS = 15;
 let TRACK_MAP = {};
 let TRACK_LINES = [];
 let cars = {};
-const carColors = ["#d9534f", "#5cb85c", "#0275d8", "#f0ad4e", "#5bc0de"];
+let currentUser = null;
+const CAR_STYLE = {
+    MY_CAR: "#FFD700",   // 내 차: 황금색
+    ADMIN: "#000000",    // 운영자: 검정색
+    OTHERS: "#BDC3C7"    // 다른 차: 회색
+};
 
 const socket = new WebSocket("ws://localhost:8080/ws/race");
 
@@ -52,12 +57,11 @@ startButton.addEventListener('click', () => {
     startButton.disabled = true;
     cars = {};
 
-    const carNames = ["Pobi", "Crong", "Honux", "JK", "Luffy"];
     const rounds = 50;
 
     totalRounds = rounds;
     roundCounter.textContent = `남은 라운드: ${totalRounds}`;
-    socket.send(`START:${carNames.join(',')}:${rounds}`);
+    socket.send(`START:${rounds}`);
 });
 
 resetButton.addEventListener('click', () => {
@@ -101,19 +105,27 @@ function updateCarPositions(carStates) {
         const {name, position, turnsToSkip} = carState;
         const targetCoords = TRACK_MAP[position];
         if (!targetCoords) return;
-
+        let assignedColor;
+        if (name === "Admin_Bot") {
+            assignedColor = CAR_STYLE.ADMIN;
+        } else if (currentUser && name.startsWith(currentUser + "_")) {
+            assignedColor = CAR_STYLE.MY_CAR;
+        } else {
+            assignedColor = CAR_STYLE.OTHERS;
+        }
         if (!cars[name]) {
             cars[name] = {
                 name: name,
                 x: targetCoords.x,
                 y: targetCoords.y,
-                color: carColors[index % carColors.length],
+                color: assignedColor,
                 turnsToSkip: turnsToSkip
             };
         } else {
             cars[name].x = targetCoords.x;
             cars[name].y = targetCoords.y;
             cars[name].turnsToSkip = turnsToSkip;
+            cars[name].color = assignedColor;
         }
     });
 }
@@ -461,6 +473,7 @@ document.getElementById('btnLoginAction').addEventListener('click', () => {
                     showConfirmButton: false
                 });
                 closeAllModals();
+                currentUser = username;
                 updateAuthUI(true,username);
             } else {
                 Swal.fire({
@@ -631,6 +644,7 @@ function checkLoginStatus() {
         })
         .then(data => {
             const username = data.username;
+            currentUser = username;
             updateAuthUI(true, username);
         })
         .catch(() => {

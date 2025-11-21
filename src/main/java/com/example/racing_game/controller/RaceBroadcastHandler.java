@@ -2,8 +2,11 @@ package com.example.racing_game.controller;
 
 import com.example.racing_game.domain.TrackLayout;
 import com.example.racing_game.dto.MapLayoutDto;
+import com.example.racing_game.repository.UserCarRepository;
 import com.example.racing_game.service.RaceService;
+import com.example.racing_game.domain.UserCar;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -15,14 +18,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class RaceBroadcastHandler extends TextWebSocketHandler {
 
     private final RaceService raceService;
+    private final UserCarRepository userCarRepository;
     private final TrackLayout trackLayout;
     private final ObjectMapper objectMapper;
     private final List<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
 
-    public RaceBroadcastHandler(RaceService raceService, TrackLayout trackLayout, ObjectMapper objectMapper) {
+    public RaceBroadcastHandler(RaceService raceService, TrackLayout trackLayout, ObjectMapper objectMapper, UserCarRepository userCarRepository) {
         this.raceService = raceService;
         this.trackLayout = trackLayout;
         this.objectMapper = objectMapper;
+        this.userCarRepository = userCarRepository;
     }
 
     @Override
@@ -39,14 +44,25 @@ public class RaceBroadcastHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         String payload = message.getPayload();
+
         if (payload.startsWith("START:")) {
             try {
                 String[] parts = payload.split(":");
-                List<String> carNames = List.of(parts[1].split(","));
-                int rounds = Integer.parseInt(parts[2]);
+                int rounds = Integer.parseInt(parts[parts.length - 1]);
+
+                List<UserCar> dbCars = userCarRepository.findAll();
+
+                List<String> carNames = new ArrayList<>(
+                        dbCars.stream().map(UserCar::getCarName).toList()
+                );
+
+                carNames.add(0, "Admin_Bot");
+
                 raceService.startAsyncRace(carNames, rounds, this::broadcast);
+
             } catch (Exception e) {
-                System.err.println("잘못된 START 메시지 형식입니다: " + payload);
+                System.err.println("경주 시작 실패: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }

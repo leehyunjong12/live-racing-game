@@ -7,8 +7,10 @@ import com.example.racing_game.domain.RandomMoveStrategy;
 import com.example.racing_game.domain.TrackLayout;
 import com.example.racing_game.service.RaceService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.racing_game.repository.UserCarRepository;
 
 import java.util.Random;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -19,11 +21,14 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @Configuration
 @EnableWebSocket
 @EnableAsync
+@RequiredArgsConstructor
 public class AppConfig implements WebSocketConfigurer {
+
+    private final UserCarRepository userCarRepository;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(raceBroadcastHandler(), "/ws/race")
+        registry.addHandler(raceBroadcastHandler(userCarRepository), "/ws/race")
                 .setAllowedOrigins("*");
     }
 
@@ -56,7 +61,7 @@ public class AppConfig implements WebSocketConfigurer {
     }
 
     @Bean
-    public RaceBroadcastHandler raceBroadcastHandler() {
-        return new RaceBroadcastHandler(raceService(), trackLayout(), objectMapper());
+    public RaceBroadcastHandler raceBroadcastHandler(UserCarRepository repo) {
+        return new RaceBroadcastHandler(raceService(), trackLayout(), objectMapper(),repo);
     }
 }
