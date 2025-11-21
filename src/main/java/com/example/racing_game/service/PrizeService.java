@@ -20,7 +20,12 @@ public class PrizeService {
 
     @Transactional
     public void awardWinnersAndReset(List<String> winnerNames) {
-        PrizePool pot = prizePoolRepository.findById(1L).orElseThrow();
+        PrizePool pot = prizePoolRepository.findById(1L)
+                .orElseGet(() -> {
+                    PrizePool newPool = new PrizePool();
+                    return prizePoolRepository.save(newPool);
+                });
+
         long totalPrize = pot.getAmount();
 
         boolean adminWins = winnerNames.contains("Admin_Bot");
