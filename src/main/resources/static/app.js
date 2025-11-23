@@ -82,7 +82,7 @@ socket.onmessage = function (event) {
         totalRounds = data.totalRounds;
         const remainingRounds = totalRounds - data.round;
         roundCounter.textContent = `남은 라운드: ${remainingRounds}`;
-        roundCounter.style.color = "#e74c3c";
+        roundCounter.style.color = "#27ae60";
 
     } else if (data.type === "WINNER") {
         isRacing = false;
@@ -445,14 +445,39 @@ function startNextRaceTimer() {
             displaySec = 0;
             displayMin += 1;
         }
+        const totalSecondsLeft = (displayMin * 60) + displaySec;
 
-        const fmtMin = displayMin.toString().padStart(2, '0');
-        const fmtSec = displaySec.toString().padStart(2, '0');
+        if (totalSecondsLeft <= 10 && totalSecondsLeft > 0) {
+            setInputsDisabled(true);
+            roundCounter.style.color = "#e74c3c";
+            roundCounter.textContent = `다음 경주까지: ${displaySec}초`;
 
-        roundCounter.textContent = `다음 경주까지: ${fmtMin}:${fmtSec}`;
-        roundCounter.style.color = "#2c3e50";
-
+        } else {
+            if (!isRacing) {
+                setInputsDisabled(false);
+                roundCounter.style.color = "#2c3e50";
+                const fmtMin = displayMin.toString().padStart(2, '0');
+                const fmtSec = displaySec.toString().padStart(2, '0');
+                roundCounter.textContent = `다음 경주까지: ${fmtMin}:${fmtSec}`;
+            }
+        }
     }, 1000);
+}
+function setInputsDisabled(isDisabled) {
+    if (authBar.btnCharge) authBar.btnCharge.disabled = isDisabled;
+    if (authBar.btnRegisterCar) authBar.btnRegisterCar.disabled = isDisabled;
+    if (authBar.btnLogout) authBar.btnLogout.disabled = isDisabled;
+
+    const opacity = isDisabled ? "0.5" : "1";
+    if (authBar.btnCharge) authBar.btnCharge.style.opacity = opacity;
+    if (authBar.btnRegisterCar) authBar.btnRegisterCar.style.opacity = opacity;
+    if (authBar.btnLogout) authBar.btnLogout.style.opacity = opacity;
+
+
+    if (isDisabled && (Swal.isVisible() || resultModal.style.display === 'flex')) {
+        Swal.close();
+        closeAllModals();
+    }
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
@@ -469,6 +494,7 @@ const authBar = {
     btnRegisterCar: document.getElementById('btnRegisterCar'),
     carCountDisplay: document.getElementById('carCountDisplay'),
     userDisplay: document.getElementById('userDisplay'),
+    btnLogout: document.getElementById('btnLogout')
 };
 
 const modals = {
