@@ -1,5 +1,4 @@
 /* global Swal */
-const resetButton = document.getElementById('resetButton');
 const canvas = document.getElementById('raceCanvas');
 const roundCounter = document.getElementById('roundCounter');
 const prizeSection = document.getElementById('prizeSection');
@@ -26,6 +25,7 @@ const LOOP_SEGMENTS = [
     [10, 7]
 ];
 let dashOffset = 0;
+let isAutoResetDone = false;
 let isRacing = false;
 let totalRounds = 0;
 const NODE_RADIUS = 15;
@@ -54,17 +54,6 @@ socket.onerror = function (error) {
     console.error("WebSocket 오류 발생:", error);
 };
 
-resetButton.addEventListener('click', () => {
-    cars = {};
-    draw();
-    resultModal.style.display = 'none';
-    roundCounter.textContent = "다음 경주 대기 중...";
-    roundCounter.style.color = "#2c3e50";
-    isRacing = false;
-    totalRounds = 0;
-    showPrizeMode();
-});
-
 socket.onmessage = function (event) {
     const data = JSON.parse(event.data);
 
@@ -79,6 +68,7 @@ socket.onmessage = function (event) {
     } else if (data.type === "RACING") {
         updateCarPositions(data.cars);
         isRacing = true;
+        isAutoResetDone = true;
         totalRounds = data.totalRounds;
         const remainingRounds = totalRounds - data.round;
         roundCounter.textContent = `남은 라운드: ${remainingRounds}`;
@@ -451,7 +441,10 @@ function startNextRaceTimer() {
             setInputsDisabled(true);
             roundCounter.style.color = "#e74c3c";
             roundCounter.textContent = `다음 경주까지: ${displaySec}초`;
-
+            if (!isAutoResetDone) {
+                performTrackReset();
+                isAutoResetDone = true;
+                }
         } else {
             if (!isRacing) {
                 setInputsDisabled(false);
@@ -459,10 +452,20 @@ function startNextRaceTimer() {
                 const fmtMin = displayMin.toString().padStart(2, '0');
                 const fmtSec = displaySec.toString().padStart(2, '0');
                 roundCounter.textContent = `다음 경주까지: ${fmtMin}:${fmtSec}`;
+                isAutoResetDone = false;
             }
         }
     }, 1000);
 }
+function performTrackReset() {
+    console.log("♻️ 경기 화면 자동 초기화");
+    cars = {};
+    draw();
+    resultModal.style.display = 'none';
+
+    showPrizeMode();
+}
+
 function setInputsDisabled(isDisabled) {
     if (authBar.btnCharge) authBar.btnCharge.disabled = isDisabled;
     if (authBar.btnRegisterCar) authBar.btnRegisterCar.disabled = isDisabled;
