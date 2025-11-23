@@ -378,3 +378,30 @@ div:where(.swal2-container) button:where(.swal2-styled).swal2-confirm {
 }
 .swal2-success-ring { border-color: #2ecc71 !important; }
 .swal2-error-x-mark-line-left, .swal2-error-x-mark-line-right { background-color: #e74c3c !important; }
+#countdownDisplay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    font-family: 'Patrick Hand', cursive;
+    font-size: 10em;
+    font-weight: 900;
+
+    color: #FFD700;
+    text-shadow: 5px 5px 0 #333;
+
+    pointer-events: none;
+    display: none;
+    z-index: 2000;
+}
+
+@keyframes countPop {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1.0); opacity: 0; }
+}
+
+.animate-count {
+    animation: countPop 0.9s ease-in-out forwards;
+}

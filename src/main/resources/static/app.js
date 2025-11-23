@@ -8,6 +8,7 @@ const boardWinnerList = document.getElementById('boardWinnerList');
 const resultModal = document.getElementById('resultModal');
 const modalWinnerList = document.getElementById('modalWinnerList');
 const closeModalBtn = document.getElementById('closeModalBtn');
+const countdownDisplay = document.getElementById('countdownDisplay');
 const ctx = canvas.getContext('2d');
 const JAIL_COORDS = {x: 50, y: 450};
 const NODE_INFO = {
@@ -66,6 +67,7 @@ socket.onmessage = function (event) {
         isRacing = false;
 
     } else if (data.type === "RACING") {
+
         updateCarPositions(data.cars);
         isRacing = true;
         isAutoResetDone = true;
@@ -439,6 +441,12 @@ function startNextRaceTimer() {
 
         if (totalSecondsLeft <= 10 && totalSecondsLeft > 0) {
             setInputsDisabled(true);
+            if (totalSecondsLeft <= 3) {
+                if (totalSecondsLeft === 3) showCountdown("3", "#e74c3c");
+                if (totalSecondsLeft === 2) showCountdown("2", "#e67e22");
+                if (totalSecondsLeft === 1) showCountdown("1", "#f1c40f");
+            }
+
             roundCounter.style.color = "#e74c3c";
             roundCounter.textContent = `다음 경주까지: ${displaySec}초`;
             if (!isAutoResetDone) {
@@ -482,7 +490,19 @@ function setInputsDisabled(isDisabled) {
         closeAllModals();
     }
 }
+function showCountdown(text, color = "#FFD700") {
+    countdownDisplay.textContent = text;
+    countdownDisplay.style.color = color;
+    countdownDisplay.style.display = "block";
 
+    countdownDisplay.classList.remove("animate-count");
+    void countdownDisplay.offsetWidth;
+    countdownDisplay.classList.add("animate-count");
+
+    setTimeout(() => {
+        countdownDisplay.style.display = "none";
+    }, 900);
+}
 document.addEventListener('DOMContentLoaded', (event) => {
     populateLegend();
     checkLoginStatus();
