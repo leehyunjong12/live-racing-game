@@ -405,3 +405,78 @@ div:where(.swal2-container) button:where(.swal2-styled).swal2-confirm {
 .animate-count {
     animation: countPop 0.9s ease-in-out forwards;
 }
+#gameLogContainer {
+    position: absolute;
+    top: 300px;
+    right: 20px;
+    width: 180px;
+    max-height: 300px;
+    height: auto;
+    background: #fff3cd;
+    border: 2px solid #e67e22;
+    border-radius: 0 0 5px 5px;
+    border-top: 5px solid #d35400;
+    box-shadow: 3px 3px 5px rgba(0,0,0,0.1);
+    font-family: 'Patrick Hand', cursive;
+    text-align: left;
+    z-index: 100;
+    display: none;
+}
+
+#gameLogHeader {
+    background: rgba(230, 126, 34, 0.1);
+    color: #d35400;
+    padding: 5px 10px;
+    font-weight: bold;
+    font-size: 0.85em;
+    text-align: center;
+    letter-spacing: 1px;
+    border-bottom: 1px dashed #e67e22;
+}
+
+#gameLogBody {
+    padding: 5px 10px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#gameLogBody::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
+
+.log-entry {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-bottom: 1px dotted #ccc;
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 3px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.log-circle {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid #555;
+    flex-shrink: 0;
+}
+
+.log-text {
+    font-size: 1em;
+    font-weight: bold;
+    color: #444;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+}

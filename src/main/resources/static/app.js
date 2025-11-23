@@ -9,6 +9,8 @@ const resultModal = document.getElementById('resultModal');
 const modalWinnerList = document.getElementById('modalWinnerList');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const countdownDisplay = document.getElementById('countdownDisplay');
+const gameLogContainer = document.getElementById('gameLogContainer');
+const gameLogBody = document.getElementById('gameLogBody');
 const ctx = canvas.getContext('2d');
 const JAIL_COORDS = {x: 50, y: 450};
 const NODE_INFO = {
@@ -75,6 +77,15 @@ socket.onmessage = function (event) {
         const remainingRounds = totalRounds - data.round;
         roundCounter.textContent = `남은 라운드: ${remainingRounds}`;
         roundCounter.style.color = "#27ae60";
+        gameLogBody.innerHTML = '';
+        if (data.events && data.events.length > 0) {
+            addLogMessages(data.events);
+        }
+        if (gameLogBody.children.length > 0) {
+            gameLogContainer.style.display = 'block';
+        } else {
+            gameLogContainer.style.display = 'none';
+        }
 
     } else if (data.type === "WINNER") {
         isRacing = false;
@@ -83,7 +94,35 @@ socket.onmessage = function (event) {
         checkLoginStatus();
     }
 };
+function addLogMessages(messages) {
+    if (!currentUser) return;
 
+    messages.forEach(msg => {
+        const [type, carName] = msg.split(':');
+        if (!carName.includes(currentUser)) return;
+
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        const circle = document.createElement('span');
+        circle.className = 'log-circle';
+
+        const nodeInfo = NODE_INFO[type] || NODE_INFO["NORMAL"];
+        circle.style.backgroundColor = nodeInfo.color;
+
+        const text = document.createElement('span');
+        text.className = 'log-text';
+        text.textContent = carName;
+
+        div.appendChild(circle);
+        div.appendChild(text);
+
+        gameLogBody.appendChild(div);
+    });
+
+    if (gameLogBody.lastChild) {
+        gameLogBody.lastChild.scrollIntoView({ behavior: "smooth" });
+    }
+}
 function updateCarPositions(carStates) {
 
     carStates.forEach((carState, index) => {
@@ -472,6 +511,8 @@ function performTrackReset() {
     resultModal.style.display = 'none';
 
     showPrizeMode();
+    gameLogBody.innerHTML = '';
+    gameLogContainer.style.display = 'none';
 }
 
 function setInputsDisabled(isDisabled) {
@@ -623,6 +664,7 @@ document.getElementById('btnLoginAction').addEventListener('click', () => {
 document.getElementById('btnLogout').addEventListener('click', () => {
     fetch('/api/auth/logout', { method: 'POST' })
         .then(() => {
+            currentUser = null
             Swal.fire({
                 icon: 'info',
                 title: '로그아웃',
