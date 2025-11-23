@@ -32,7 +32,7 @@ public class RaceService {
         List<Car> cars = carNames.stream().map(Car::new).toList();
 
         try { // 0라운드
-            String roundZeroJson = createJsonState(0, cars);
+            String roundZeroJson = createJsonState(0,rounds, cars);
             broadcaster.accept(roundZeroJson);
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -51,7 +51,7 @@ public class RaceService {
                 car.setTurnsToSkip(result.penaltyTurns());
             });
 
-            String roundResultJson = createJsonState(i + 1, cars);
+            String roundResultJson = createJsonState(i + 1,rounds, cars);
             broadcaster.accept(roundResultJson);
 
             try {
@@ -75,7 +75,7 @@ public class RaceService {
         return cars.stream().anyMatch(car -> car.getPosition() == GameRuleEngine.TRACK_LENGTH);
     }
 
-    private String createJsonState(int round, List<Car> cars) {
+    private String createJsonState(int round, int totalRounds, List<Car> cars) {
         List<Map<String, Object>> carStates = cars.stream()
                 .map(car -> {
                     Map<String, Object> map = new HashMap<>();
@@ -86,7 +86,7 @@ public class RaceService {
                 })
                 .toList();
         Map<String, Object> jsonMap = Map.of(
-                "type", "RACING", "round", round, "cars", carStates
+                "type", "RACING", "round", round,"totalRounds", totalRounds, "cars", carStates
         );
         try {
             return objectMapper.writeValueAsString(jsonMap);

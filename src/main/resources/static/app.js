@@ -1,5 +1,4 @@
 /* global Swal */
-const startButton = document.getElementById('startButton');
 const resetButton = document.getElementById('resetButton');
 const canvas = document.getElementById('raceCanvas');
 const roundCounter = document.getElementById('roundCounter');
@@ -27,6 +26,7 @@ const LOOP_SEGMENTS = [
     [10, 7]
 ];
 let dashOffset = 0;
+let isRacing = false;
 let totalRounds = 0;
 const NODE_RADIUS = 15;
 let TRACK_MAP = {};
@@ -48,31 +48,19 @@ socket.onopen = function (event) {
 
 socket.onclose = function (event) {
     console.log("서버와 연결이 끊겼습니다.");
-    startButton.disabled = true;
-    startButton.textContent = "서버 연결 중...";
 };
 
 socket.onerror = function (error) {
     console.error("WebSocket 오류 발생:", error);
 };
-startButton.addEventListener('click', () => {
-    startButton.disabled = true;
-    cars = {};
-
-    const rounds = 50;
-
-    totalRounds = rounds;
-    roundCounter.textContent = `남은 라운드: ${totalRounds}`;
-    socket.send(`START:${rounds}`);
-});
 
 resetButton.addEventListener('click', () => {
     cars = {};
     draw();
-    startButton.disabled = false;
-    startButton.textContent = "경주 시작!";
     resultModal.style.display = 'none';
-    roundCounter.textContent = "남은 라운드: -";
+    roundCounter.textContent = "다음 경주 대기 중...";
+    roundCounter.style.color = "#2c3e50";
+    isRacing = false;
     totalRounds = 0;
     showPrizeMode();
 });
@@ -86,18 +74,20 @@ socket.onmessage = function (event) {
         TRACK_LINES = data.lines;
 
         draw();
-        startButton.disabled = false;
-        startButton.textContent = "경주 시작!";
+        isRacing = false;
 
     } else if (data.type === "RACING") {
         updateCarPositions(data.cars);
+        isRacing = true;
+        totalRounds = data.totalRounds;
         const remainingRounds = totalRounds - data.round;
         roundCounter.textContent = `남은 라운드: ${remainingRounds}`;
+        roundCounter.style.color = "#e74c3c";
 
     } else if (data.type === "WINNER") {
+        isRacing = false;
+        totalRounds = 0;
         displayWinner(data.winners);
-        startButton.disabled = false;
-        roundCounter.textContent = "남은 라운드: 0";
         checkLoginStatus();
     }
 };
@@ -438,11 +428,38 @@ function fetchPrize() {
             totalPrizeDisplay.textContent = "0 ₩";
         });
 }
+function startNextRaceTimer() {
+    setInterval(() => {
+        if (isRacing) return;
+        const now = new Date();
+        const minutes = now.getMinutes();
+        const seconds = now.getSeconds();
+
+        const nextFiveMin = (Math.floor(minutes / 5) + 1) * 5;
+        const diffMinutes = nextFiveMin - minutes - 1;
+        const diffSeconds = 60 - seconds;
+
+        let displayMin = diffMinutes;
+        let displaySec = diffSeconds;
+        if (displaySec === 60) {
+            displaySec = 0;
+            displayMin += 1;
+        }
+
+        const fmtMin = displayMin.toString().padStart(2, '0');
+        const fmtSec = displaySec.toString().padStart(2, '0');
+
+        roundCounter.textContent = `다음 경주까지: ${fmtMin}:${fmtSec}`;
+        roundCounter.style.color = "#2c3e50";
+
+    }, 1000);
+}
 
 document.addEventListener('DOMContentLoaded', (event) => {
     populateLegend();
     checkLoginStatus();
     showPrizeMode();
+    startNextRaceTimer();
 });
 
 const authBar = {
