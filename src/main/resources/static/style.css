@@ -126,40 +126,56 @@ button:active:not(:disabled) {
     border: 2px solid #333;
     border-radius: 50%;
 }
-#winnerBoard {
+#raceStatusBoard {
     position: absolute;
     top: 80px;
     right: 20px;
-    background: #d1f2eb;
-    border: 2px solid #16a085;
+
+    background: rgba(255, 255, 255, 0.95);
+    border: 3px solid #333;
+    border-radius: 10px;
     padding: 15px;
-    border-radius: 5px;
-    transform: rotate(2deg);
-    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1);
+
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1);
     z-index: 200;
-    min-width: 180px;
+    min-width: 200px;
+    text-align: center;
+
+    transition: all 0.3s ease;
 }
 
-#winnerBoard h3 {
+#raceStatusBoard h3 {
     margin: 0 0 10px 0;
-    color: #16a085;
-    font-size: 1.3em;
-    border-bottom: 2px solid #16a085;
+    font-size: 1.2em;
+    color: #2c3e50;
+    border-bottom: 2px dashed #7f8c8d;
     padding-bottom: 5px;
 }
 
-#winnerBoard ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+#totalPrizeDisplay {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #e67e22;
+    font-family: 'Patrick Hand', cursive;
 }
 
-#winnerBoard li {
+#boardWinnerList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#boardWinnerList li {
     font-size: 1.2em;
     margin: 5px 0;
+    padding: 5px;
     color: #333;
+    background-color: #f0f8ff;
+    border-left: 4px solid #f1c40f;
     text-align: left;
+    border-radius: 3px;
 }
+
 
 .modal-overlay {
     position: fixed;
@@ -243,7 +259,7 @@ button:active:not(:disabled) {
     color: #333;
     border: 2px solid #333;
 
-    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+    border-radius: 255px 15px 225px 15px /  15px 225px 15px 255px;
     box-shadow: 2px 2px 0 #333;
 
     cursor: pointer;

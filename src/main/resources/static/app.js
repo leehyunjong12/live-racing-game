@@ -3,8 +3,10 @@ const startButton = document.getElementById('startButton');
 const resetButton = document.getElementById('resetButton');
 const canvas = document.getElementById('raceCanvas');
 const roundCounter = document.getElementById('roundCounter');
-const winnerBoard = document.getElementById('winnerBoard');
-const winnerList = document.getElementById('winnerList');
+const prizeSection = document.getElementById('prizeSection');
+const totalPrizeDisplay = document.getElementById('totalPrizeDisplay');
+const winnerSection = document.getElementById('winnerSection');
+const boardWinnerList = document.getElementById('boardWinnerList');
 const resultModal = document.getElementById('resultModal');
 const modalWinnerList = document.getElementById('modalWinnerList');
 const closeModalBtn = document.getElementById('closeModalBtn');
@@ -69,10 +71,10 @@ resetButton.addEventListener('click', () => {
     draw();
     startButton.disabled = false;
     startButton.textContent = "경주 시작!";
-    winnerBoard.style.display = 'none';
     resultModal.style.display = 'none';
     roundCounter.textContent = "남은 라운드: -";
     totalRounds = 0;
+    showPrizeMode();
 });
 
 socket.onmessage = function (event) {
@@ -174,8 +176,7 @@ function displayWinner(winners) {
             });
         }
     }
-
-    updateSideBoard(winners);
+    showWinnerMode(winners);
     checkLoginStatus();
 }
 function showResultModal(winners) {
@@ -192,31 +193,6 @@ function showResultModal(winners) {
         });
     }
     resultModal.style.display = 'flex';
-}
-function updateSideBoard(winners) {
-    winnerList.innerHTML = '';
-
-    if (winners.length === 0) {
-        winnerList.innerHTML = '<li>No Winners</li>';
-        winnerBoard.style.display = 'block';
-        return;
-    }
-
-    winners.forEach(name => {
-        const li = document.createElement('li');
-
-        if (name === "Admin_Bot") {
-            li.textContent = `🤖 ${name}`;
-            li.style.color = "#333";
-            li.style.borderLeft = "4px solid #333";
-        } else {
-            li.textContent = `🥇 ${name}`;
-        }
-
-        winnerList.appendChild(li);
-    });
-
-    winnerBoard.style.display = 'block';
 }
 
 closeModalBtn.addEventListener('click', () => {
@@ -421,9 +397,52 @@ function populateLegend() {
     }
 }
 
+function showPrizeMode() {
+    winnerSection.style.display = 'none';
+    prizeSection.style.display = 'block';
+    fetchPrize();
+}
+
+function showWinnerMode(winners) {
+    boardWinnerList.innerHTML = '';
+    if (winners.length === 0) {
+        boardWinnerList.innerHTML = '<li>No Winners</li>';
+    } else {
+        winners.forEach(name => {
+            const li = document.createElement('li');
+            if (name === "Admin_Bot") {
+                li.textContent = `🤖 ${name}`;
+                li.style.borderLeftColor = "#333";
+            } else {
+                li.textContent = `🥇 ${name}`;
+            }
+            boardWinnerList.appendChild(li);
+        });
+    }
+
+    prizeSection.style.display = 'none';
+    winnerSection.style.display = 'block';
+
+    setTimeout(() => {
+        showPrizeMode();
+    }, 30000);
+}
+
+function fetchPrize() {
+    fetch('/api/prize/pot')
+        .then(res => res.json())
+        .then(data => {
+            totalPrizeDisplay.textContent = `${data.amount.toLocaleString()} ₩`;
+        })
+        .catch(() => {
+            totalPrizeDisplay.textContent = "0 ₩";
+        });
+}
+
 document.addEventListener('DOMContentLoaded', (event) => {
     populateLegend();
     checkLoginStatus();
+    showPrizeMode();
 });
 
 const authBar = {
@@ -661,6 +680,7 @@ function registerCarsAPI(quantity) {
             const data = await response.json();
             if (response.ok) {
                 Swal.fire('등록 성공!', `${quantity}대가 출전 명단에 올랐습니다.`, 'success');
+                fetchPrize();
                 checkLoginStatus();
             } else {
                 Swal.fire('등록 실패', data.error || '오류가 발생했습니다.', 'error');
