@@ -32,24 +32,24 @@ public class GameRuleEngine {
             case JAIL:
                 // 30% 확률
                 if (random.nextInt(100) < 30) {
-                    return new RuleResult(position, 2);
+                    return new RuleResult(position, 2, TileType.JAIL);
                 } else {
-                    return new RuleResult(position, NO_PENALTY);
+                    return new RuleResult(position, NO_PENALTY, TileType.NORMAL);
                 }
 
             case MOVE_BACK_NODE:
                 // 30% 확률
                 if (random.nextInt(100) < 30) {
                     int penaltyPos = Math.max(0, position - 2);
-                    return new RuleResult(penaltyPos, NO_PENALTY);
+                    return new RuleResult(penaltyPos, NO_PENALTY, TileType.MOVE_BACK_NODE);
                 } else {
-                    return new RuleResult(position, NO_PENALTY);
+                    return new RuleResult(position, NO_PENALTY, TileType.NORMAL);
                 }
             case MOVE_TO_MIDPOINTS:
                 int randomPoint = random.nextInt(10, 21);
-                return new RuleResult(randomPoint,NO_PENALTY);
+                return new RuleResult(randomPoint,NO_PENALTY, TileType.MOVE_TO_MIDPOINTS);
             case MOVE_TO_START:
-                return new RuleResult(0, NO_PENALTY);
+                return new RuleResult(0, NO_PENALTY,TileType.MOVE_TO_START);
             default:
                 return new RuleResult(position, NO_PENALTY);
         }

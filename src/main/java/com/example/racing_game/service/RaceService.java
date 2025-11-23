@@ -3,8 +3,10 @@ package com.example.racing_game.service;
 import com.example.racing_game.domain.Car;
 import com.example.racing_game.domain.GameRuleEngine;
 import com.example.racing_game.domain.MoveStrategy;
+import com.example.racing_game.domain.TileType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import org.springframework.scheduling.annotation.Async;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +34,7 @@ public class RaceService {
         List<Car> cars = carNames.stream().map(Car::new).toList();
 
         try { // 0라운드
-            String roundZeroJson = createJsonState(0,rounds, cars);
+            String roundZeroJson = createJsonState(0, rounds, cars, new ArrayList<>());
             broadcaster.accept(roundZeroJson);
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -40,6 +42,7 @@ public class RaceService {
         }
 
         for (int i = 0; i < rounds; i++) {
+            List<String> turnEvents = new ArrayList<>();
             cars.forEach(car -> {
                 if (car.isSkippingTurn()) {
                     car.consumeSkipTurn();
@@ -49,9 +52,13 @@ public class RaceService {
                 RuleResult result = gameRuleEngine.getNextPosition(car.getPosition(), canMove);
                 car.setPosition(result.nextPosition());
                 car.setTurnsToSkip(result.penaltyTurns());
+                if (result.triggeredEvent() != TileType.NORMAL) {
+                    String eventCode = result.triggeredEvent().name() + ":" + car.getName();
+                    turnEvents.add(eventCode);
+                }
             });
 
-            String roundResultJson = createJsonState(i + 1,rounds, cars);
+            String roundResultJson = createJsonState(i + 1, rounds, cars, turnEvents);
             broadcaster.accept(roundResultJson);
 
             try {
@@ -75,7 +82,7 @@ public class RaceService {
         return cars.stream().anyMatch(car -> car.getPosition() == GameRuleEngine.TRACK_LENGTH);
     }
 
-    private String createJsonState(int round, int totalRounds, List<Car> cars) {
+    private String createJsonState(int round, int totalRounds, List<Car> cars, List<String> events) {
         List<Map<String, Object>> carStates = cars.stream()
                 .map(car -> {
                     Map<String, Object> map = new HashMap<>();
@@ -86,7 +93,7 @@ public class RaceService {
                 })
                 .toList();
         Map<String, Object> jsonMap = Map.of(
-                "type", "RACING", "round", round,"totalRounds", totalRounds, "cars", carStates
+                "type", "RACING", "round", round, "totalRounds", totalRounds, "cars", carStates, "events", events
         );
         try {
             return objectMapper.writeValueAsString(jsonMap);

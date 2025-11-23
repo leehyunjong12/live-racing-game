@@ -73,6 +73,7 @@ public class GameRuleEngineTest {
 
         assertThat(result.nextPosition()).isEqualTo(23);
         assertThat(result.penaltyTurns()).isEqualTo(2);
+        assertThat(result.triggeredEvent()).isEqualTo(TileType.JAIL);
     }
 
     @Test
@@ -99,6 +100,7 @@ public class GameRuleEngineTest {
 
         assertThat(result.nextPosition()).isEqualTo(4);
         assertThat(result.penaltyTurns()).isEqualTo(0);
+        assertThat(result.triggeredEvent()).isEqualTo(TileType.MOVE_BACK_NODE);
     }
 
     @Test
@@ -122,6 +124,7 @@ public class GameRuleEngineTest {
 
         assertThat(result.nextPosition()).isEqualTo(0);
         assertThat(result.penaltyTurns()).isZero();
+        assertThat(result.triggeredEvent()).isEqualTo(TileType.MOVE_TO_START);
     }
     @Test
     @DisplayName("MOVE_TO_MIDPOINTS(16번)를 밟으면, 10~20 사이의 17번으로 이동")
@@ -133,5 +136,6 @@ public class GameRuleEngineTest {
 
         assertThat(result.nextPosition()).isEqualTo(17);
         assertThat(result.penaltyTurns()).isZero();
+        assertThat(result.triggeredEvent()).isEqualTo(TileType.MOVE_TO_MIDPOINTS);
     }
 }

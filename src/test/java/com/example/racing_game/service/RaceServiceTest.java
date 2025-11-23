@@ -9,6 +9,7 @@ import static org.mockito.Mockito.*;
 import com.example.racing_game.domain.GameRuleEngine;
 import com.example.racing_game.domain.MapDataStorage;
 import com.example.racing_game.domain.MoveStrategy;
+import com.example.racing_game.domain.TileType;
 import com.example.racing_game.dto.RuleResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -175,6 +176,30 @@ public class RaceServiceTest {
 
         inOrder.verify(prizeService).awardWinnersAndReset(anyList());
         inOrder.verify(broadcaster).accept(anyString());
+    }
+    @Test
+    @DisplayName("특수 노드 이벤트 발생 시, JSON 이벤트 리스트에 '타입:이름' 형식이 포함")
+    void shouldIncludeEventLogWhenSpecialTileIsTriggered() throws JsonProcessingException {
+        List<String> carNames = List.of("Pobi");
+        int rounds = 1;
+        Consumer<String> broadcaster = (json) -> {};
+
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+        when(moveStrategy.shouldMove()).thenReturn(true);
+
+
+        when(gameRuleEngine.getNextPosition(anyInt(), eq(true)))
+                .thenReturn(new RuleResult(30, 2, TileType.JAIL));
+
+        raceService.startAsyncRace(carNames, rounds, broadcaster);
+
+        verify(objectMapper, times(3)).writeValueAsString(mapCaptor.capture());
+
+        Map<String, Object> raceMap = mapCaptor.getAllValues().get(1);
+        List<String> events = (List<String>) raceMap.get("events");
+
+        assertThat(events).hasSize(1);
+        assertThat(events.get(0)).isEqualTo("JAIL:Pobi");
     }
 
 }

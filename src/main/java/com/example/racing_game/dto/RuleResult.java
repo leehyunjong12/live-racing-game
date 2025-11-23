@@ -1,12 +1,14 @@
 package com.example.racing_game.dto;
 
 
-/**
- * 규칙 엔진이 계산한 결과
- * @param nextPosition 다음 위치
- * @param penaltyTurns 다음 턴에 쉴 횟수 (0이면 쉼 없음)
- */
+import com.example.racing_game.domain.TileType;
+
 public record RuleResult(
         int nextPosition,
-        int penaltyTurns
-) {}
+        int penaltyTurns,
+        TileType triggeredEvent
+) {
+    public RuleResult(int nextPosition, int penaltyTurns) {
+        this(nextPosition, penaltyTurns, TileType.NORMAL);
+    }
+}
