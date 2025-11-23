@@ -19,10 +19,12 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
 @EnableWebSocket
 @EnableAsync
+@EnableScheduling
 @RequiredArgsConstructor
 public class AppConfig implements WebSocketConfigurer {
 

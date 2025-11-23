@@ -7,6 +7,7 @@ import com.example.racing_game.service.RaceService;
 import com.example.racing_game.domain.UserCar;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -40,31 +41,29 @@ public class RaceBroadcastHandler extends TextWebSocketHandler {
         String mapJson = objectMapper.writeValueAsString(mapLayout);
         session.sendMessage(new TextMessage(mapJson));
     }
+    @Scheduled(cron = "0 */5 * * * *")
+    public void startScheduledRace() {
+        try {
+            System.out.println("--- ⏰ 5분 스케줄링: 자동 경주 시작 ---");
+            broadcast("{\"type\":\"INFO\", \"message\":\"잠시 후 경주가 시작됩니다!\"}");
+
+            List<UserCar> dbCars = userCarRepository.findAll();
+            List<String> carNames = new ArrayList<>(
+                    dbCars.stream().map(UserCar::getCarName).toList()
+            );
+
+            carNames.add(0, "Admin_Bot");
+            int rounds = 50;
+            raceService.startAsyncRace(carNames, rounds, this::broadcast);
+
+        } catch (Exception e) {
+            System.err.println("스케줄링 오류: " + e.getMessage());
+        }
+    }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) {
-        String payload = message.getPayload();
-
-        if (payload.startsWith("START:")) {
-            try {
-                String[] parts = payload.split(":");
-                int rounds = Integer.parseInt(parts[parts.length - 1]);
-
-                List<UserCar> dbCars = userCarRepository.findAll();
-
-                List<String> carNames = new ArrayList<>(
-                        dbCars.stream().map(UserCar::getCarName).toList()
-                );
-
-                carNames.add(0, "Admin_Bot");
-
-                raceService.startAsyncRace(carNames, rounds, this::broadcast);
-
-            } catch (Exception e) {
-                System.err.println("경주 시작 실패: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
+        System.out.println("클라이언트 메시지 수신(무시됨): " + message.getPayload());
     }
 
     @Override
